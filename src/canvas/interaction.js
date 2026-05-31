@@ -43,14 +43,15 @@ export function zoomAtViewportPoint(transform, viewportX, viewportY, nextScale) 
   }
 }
 
-export function getPointerPairMetrics(pointers, viewportRect) {
-  if (pointers.size < 2) return null
+export function getTouchPairMetrics(touchList, viewportRect) {
+  if (!touchList || touchList.length < 2) return null
 
-  const [first, second] = [...pointers.values()]
-  const ax = first.x - viewportRect.left
-  const ay = first.y - viewportRect.top
-  const bx = second.x - viewportRect.left
-  const by = second.y - viewportRect.top
+  const first = touchList[0]
+  const second = touchList[1]
+  const ax = first.clientX - viewportRect.left
+  const ay = first.clientY - viewportRect.top
+  const bx = second.clientX - viewportRect.left
+  const by = second.clientY - viewportRect.top
 
   return {
     distance: Math.hypot(bx - ax, by - ay),

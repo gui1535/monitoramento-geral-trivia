@@ -53,9 +53,25 @@ const modeLabels = {
   [INTERACTION_MODE.ACTION]: 'Ação',
 }
 
+const touchSurfaceStyle = {
+  position: 'absolute',
+  inset: 0,
+  zIndex: 10,
+  touchAction: 'none',
+  WebkitTouchCallout: 'none',
+  WebkitUserSelect: 'none',
+}
+
 export function CanvasViewport({ mode = INTERACTION_MODE.NAVIGATION, toolbar, children }) {
-  const { transform, isPanning, viewportRef, fitToViewport, handlers } =
-    useViewport(mode)
+  const {
+    transform,
+    isPanning,
+    viewportRef,
+    touchSurfaceRef,
+    fitToViewport,
+    mouseHandlers,
+    showTouchSurface,
+  } = useViewport(mode)
 
   useEffect(() => {
     const viewport = viewportRef.current
@@ -81,7 +97,7 @@ export function CanvasViewport({ mode = INTERACTION_MODE.NAVIGATION, toolbar, ch
   const cursor = getCanvasCursor(mode, isPanning)
 
   return (
-    <div ref={viewportRef} style={viewportStyle} {...handlers}>
+    <div ref={viewportRef} style={viewportStyle}>
       <div style={chromeStyle}>{toolbar}</div>
 
       <div
@@ -93,6 +109,15 @@ export function CanvasViewport({ mode = INTERACTION_MODE.NAVIGATION, toolbar, ch
       >
         {children}
       </div>
+
+      {showTouchSurface ? (
+        <div
+          ref={touchSurfaceRef}
+          style={touchSurfaceStyle}
+          aria-hidden="true"
+          {...mouseHandlers}
+        />
+      ) : null}
 
       <div style={hudStyle} aria-hidden="true">
         <span>{modeLabels[mode]}</span>

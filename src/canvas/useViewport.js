@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
@@ -9,7 +9,7 @@ import {
 } from './constants'
 import {
   computeFitTransform,
-  getPointerPairMetrics,
+  getTouchPairMetrics,
   zoomAtViewportPoint,
 } from './interaction'
 
@@ -33,10 +33,10 @@ export function useViewport(mode = INTERACTION_MODE.NAVIGATION) {
   const transformRef = useRef(transform)
   transformRef.current = transform
 
-  const pointersRef = useRef(new Map())
+  const viewportRef = useRef(null)
+  const touchSurfaceRef = useRef(null)
   const panRef = useRef(null)
   const pinchRef = useRef(null)
-  const viewportRef = useRef(null)
 
   const clampTranslate = useCallback((x, y, scale) => {
     const viewport = viewportRef.current
@@ -84,163 +84,193 @@ export function useViewport(mode = INTERACTION_MODE.NAVIGATION) {
   }, [])
 
   const clearInteraction = useCallback(() => {
-    pointersRef.current.clear()
     panRef.current = null
     pinchRef.current = null
     setIsPanning(false)
   }, [])
 
-  const beginPinch = useCallback((viewport) => {
+  const startPinch = useCallback((touchList, viewport) => {
     const rect = viewport.getBoundingClientRect()
-    const metrics = getPointerPairMetrics(pointersRef.current, rect)
-    if (!metrics || metrics.distance < 2) return
+    const metrics = getTouchPairMetrics(touchList, rect)
+    if (!metrics || metrics.distance < 4) return false
 
     panRef.current = null
     setIsPanning(false)
-
     pinchRef.current = {
       startDistance: metrics.distance,
       startCenterX: metrics.centerX,
       startCenterY: metrics.centerY,
       startTransform: { ...transformRef.current },
     }
+    return true
   }, [])
 
-  const handlePointerDown = useCallback(
-    (event) => {
-      if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
-      if (event.pointerType === 'mouse' && event.button !== 0) return
+  const updatePinch = useCallback(
+    (touchList, viewport) => {
+      const pinch = pinchRef.current
+      if (!pinch) return
 
-      event.preventDefault()
+      const rect = viewport.getBoundingClientRect()
+      const metrics = getTouchPairMetrics(touchList, rect)
+      if (!metrics || metrics.distance < 4) return
 
-      const viewport = viewportRef.current
-      if (!viewport) return
+      const nextScale = clamp(
+        pinch.startTransform.scale * (metrics.distance / pinch.startDistance),
+        MIN_ZOOM,
+        MAX_ZOOM,
+      )
 
-      pointersRef.current.set(event.pointerId, {
-        x: event.clientX,
-        y: event.clientY,
+      const zoomed = zoomAtViewportPoint(
+        pinch.startTransform,
+        metrics.centerX,
+        metrics.centerY,
+        nextScale,
+      )
+
+      applyTransform({
+        x: zoomed.x + (metrics.centerX - pinch.startCenterX),
+        y: zoomed.y + (metrics.centerY - pinch.startCenterY),
+        scale: nextScale,
       })
-
-      if (pointersRef.current.size === 1) {
-        pinchRef.current = null
-        panRef.current = {
-          pointerId: event.pointerId,
-          startX: event.clientX,
-          startY: event.clientY,
-          originX: transformRef.current.x,
-          originY: transformRef.current.y,
-        }
-        setIsPanning(true)
-        return
-      }
-
-      if (pointersRef.current.size === 2) {
-        beginPinch(viewport)
-      }
     },
-    [beginPinch],
+    [applyTransform],
   )
 
-  const handlePointerMove = useCallback(
-    (event) => {
-      if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
-      if (!pointersRef.current.has(event.pointerId)) return
+  const startPan = useCallback((clientX, clientY) => {
+    pinchRef.current = null
+    panRef.current = {
+      startX: clientX,
+      startY: clientY,
+      originX: transformRef.current.x,
+      originY: transformRef.current.y,
+    }
+    setIsPanning(true)
+  }, [])
 
-      event.preventDefault()
-
-      pointersRef.current.set(event.pointerId, {
-        x: event.clientX,
-        y: event.clientY,
-      })
-
-      const viewport = viewportRef.current
-      if (!viewport) return
-
-      if (pointersRef.current.size >= 2) {
-        if (!pinchRef.current) {
-          beginPinch(viewport)
-        }
-
-        const pinch = pinchRef.current
-        if (!pinch) return
-
-        const rect = viewport.getBoundingClientRect()
-        const metrics = getPointerPairMetrics(pointersRef.current, rect)
-        if (!metrics || metrics.distance < 2) return
-
-        const nextScale = clamp(
-          pinch.startTransform.scale *
-            (metrics.distance / pinch.startDistance),
-          MIN_ZOOM,
-          MAX_ZOOM,
-        )
-
-        const zoomed = zoomAtViewportPoint(
-          pinch.startTransform,
-          metrics.centerX,
-          metrics.centerY,
-          nextScale,
-        )
-
-        const panDx = metrics.centerX - pinch.startCenterX
-        const panDy = metrics.centerY - pinch.startCenterY
-
-        applyTransform({
-          x: zoomed.x + panDx,
-          y: zoomed.y + panDy,
-          scale: nextScale,
-        })
-        return
-      }
-
+  const updatePan = useCallback(
+    (clientX, clientY) => {
       const pan = panRef.current
-      if (!pan || pan.pointerId !== event.pointerId) return
+      if (!pan) return
 
-      const dx = event.clientX - pan.startX
-      const dy = event.clientY - pan.startY
       const next = clampTranslate(
-        pan.originX + dx,
-        pan.originY + dy,
+        pan.originX + (clientX - pan.startX),
+        pan.originY + (clientY - pan.startY),
         transformRef.current.scale,
       )
 
       setTransform((prev) => ({ ...prev, x: next.x, y: next.y }))
     },
-    [applyTransform, beginPinch, clampTranslate],
+    [clampTranslate],
+  )
+
+  useLayoutEffect(() => {
+    if (!isNavigation) return
+
+    const surface = touchSurfaceRef.current
+    const viewport = viewportRef.current
+    if (!surface || !viewport) return
+
+    function onTouchStart(event) {
+      if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
+
+      event.preventDefault()
+
+      if (event.touches.length >= 2) {
+        startPinch(event.touches, viewport)
+        return
+      }
+
+      if (event.touches.length === 1) {
+        const touch = event.touches[0]
+        startPan(touch.clientX, touch.clientY)
+      }
+    }
+
+    function onTouchMove(event) {
+      if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
+
+      if (event.touches.length >= 2) {
+        event.preventDefault()
+
+        if (!pinchRef.current) {
+          startPinch(event.touches, viewport)
+        }
+
+        updatePinch(event.touches, viewport)
+        return
+      }
+
+      if (event.touches.length === 1 && panRef.current && !pinchRef.current) {
+        event.preventDefault()
+        const touch = event.touches[0]
+        updatePan(touch.clientX, touch.clientY)
+      }
+    }
+
+    function onTouchEnd(event) {
+      if (event.touches.length >= 2) {
+        startPinch(event.touches, viewport)
+        return
+      }
+
+      if (event.touches.length === 1) {
+        pinchRef.current = null
+        const touch = event.touches[0]
+        startPan(touch.clientX, touch.clientY)
+        return
+      }
+
+      clearInteraction()
+    }
+
+    surface.addEventListener('touchstart', onTouchStart, { passive: false })
+    surface.addEventListener('touchmove', onTouchMove, { passive: false })
+    surface.addEventListener('touchend', onTouchEnd, { passive: false })
+    surface.addEventListener('touchcancel', onTouchEnd, { passive: false })
+
+    return () => {
+      surface.removeEventListener('touchstart', onTouchStart)
+      surface.removeEventListener('touchmove', onTouchMove)
+      surface.removeEventListener('touchend', onTouchEnd)
+      surface.removeEventListener('touchcancel', onTouchEnd)
+    }
+  }, [
+    isNavigation,
+    clearInteraction,
+    startPan,
+    startPinch,
+    updatePan,
+    updatePinch,
+  ])
+
+  const handlePointerDown = useCallback(
+    (event) => {
+      if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
+      if (event.pointerType === 'touch') return
+      if (event.button !== 0) return
+
+      event.preventDefault()
+      startPan(event.clientX, event.clientY)
+    },
+    [startPan],
+  )
+
+  const handlePointerMove = useCallback(
+    (event) => {
+      if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
+      if (event.pointerType === 'touch') return
+      if (!panRef.current) return
+
+      event.preventDefault()
+      updatePan(event.clientX, event.clientY)
+    },
+    [updatePan],
   )
 
   const handlePointerUp = useCallback((event) => {
-    pointersRef.current.delete(event.pointerId)
-
-    const pan = panRef.current
-    if (pan?.pointerId === event.pointerId) {
-      panRef.current = null
-      setIsPanning(false)
-    }
-
-    if (pointersRef.current.size < 2) {
-      pinchRef.current = null
-    }
-
-    if (pointersRef.current.size === 1) {
-      const [remainingId, remaining] = [...pointersRef.current.entries()][0]
-      panRef.current = {
-        pointerId: remainingId,
-        startX: remaining.x,
-        startY: remaining.y,
-        originX: transformRef.current.x,
-        originY: transformRef.current.y,
-      }
-      setIsPanning(true)
-      return
-    }
-
-    if (pointersRef.current.size === 0) {
-      panRef.current = null
-      pinchRef.current = null
-      setIsPanning(false)
-    }
-  }, [])
+    if (event.pointerType === 'touch') return
+    clearInteraction()
+  }, [clearInteraction])
 
   useEffect(() => {
     if (isNavigation) return
@@ -278,12 +308,13 @@ export function useViewport(mode = INTERACTION_MODE.NAVIGATION) {
     return () => viewport.removeEventListener('wheel', handleWheel)
   }, [clampTranslate])
 
-  const panHandlers = isNavigation
+  const mouseHandlers = isNavigation
     ? {
         onPointerDown: handlePointerDown,
         onPointerMove: handlePointerMove,
         onPointerUp: handlePointerUp,
         onPointerCancel: handlePointerUp,
+        onPointerLeave: handlePointerUp,
       }
     : {}
 
@@ -291,7 +322,9 @@ export function useViewport(mode = INTERACTION_MODE.NAVIGATION) {
     transform,
     isPanning: isNavigation && isPanning,
     viewportRef,
+    touchSurfaceRef,
     fitToViewport,
-    handlers: panHandlers,
+    mouseHandlers,
+    showTouchSurface: isNavigation,
   }
 }
