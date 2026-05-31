@@ -6,16 +6,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,20 +32,23 @@ jobs:
           else
             echo "VITE_BASE_PATH=/${REPO}/" >> "$GITHUB_ENV"
           fi
+          echo "Base: ${VITE_BASE_PATH:-/}"
 
       - run: npm ci
       - run: npm run build
 
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+      - name: Verificar build (não publicar código-fonte)
+        run: |
+          if grep -q 'src/main.jsx' dist/index.html; then
+            echo "ERRO: dist/index.html ainda aponta para src/main.jsx"
+            exit 1
+          fi
+          echo "OK: dist/index.html"
+          head -15 dist/index.html
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publicar dist na branch gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true

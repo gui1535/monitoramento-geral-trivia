@@ -22,10 +22,16 @@ Ex.: [https://gui1535.github.io/monitoramento-geral-trivia/](https://gui1535.git
 
 ### Ativar no repositório (uma vez)
 
-1. GitHub → **Settings** → **Pages**
-2. **Build and deployment** → **Source:** **GitHub Actions** (não use “Deploy from a branch” na raiz do repo — isso publica o código-fonte e gera erro de MIME em `/src/main.jsx`)
-3. Faça push na `main` (ou rode o workflow **Deploy GitHub Pages** em **Actions**)
-4. Abra sempre a URL com o nome do repositório no final (não só `https://gui1535.github.io/`)
+1. Faça **push** na `main` e aguarde o workflow **Deploy GitHub Pages** terminar (verde) em **Actions**
+2. GitHub → **Settings** → **Pages**
+3. **Build and deployment** → **Source:** **Deploy from a branch**
+4. **Branch:** `gh-pages` · pasta **`/ (root)`** → **Save**
+
+> **Importante:** não use a branch `main` na raiz `/`. Isso publica o código-fonte e causa o erro `src/main.jsx` com MIME `text/html`.
+
+5. Abra a URL do repositório, por exemplo:  
+   **https://gui1535.github.io/monitoramento-geral-trivia/**  
+   (não use só `https://gui1535.github.io/` — essa é a página do usuário, outro site)
 
 O workflow está em `.github/workflows/deploy-pages.yml`.
 
