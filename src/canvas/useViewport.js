@@ -7,7 +7,11 @@ import {
   MIN_ZOOM,
   ZOOM_WHEEL_FACTOR,
 } from './constants'
-import { computeFitTransform } from './interaction'
+import {
+  computeFitTransform,
+  getPointerPairMetrics,
+  zoomAtViewportPoint,
+} from './interaction'
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
@@ -26,7 +30,12 @@ export function useViewport(mode = INTERACTION_MODE.NAVIGATION) {
   })
   const [isPanning, setIsPanning] = useState(false)
 
+  const transformRef = useRef(transform)
+  transformRef.current = transform
+
+  const pointersRef = useRef(new Map())
   const panRef = useRef(null)
+  const pinchRef = useRef(null)
   const viewportRef = useRef(null)
 
   const clampTranslate = useCallback((x, y, scale) => {
@@ -49,6 +58,14 @@ export function useViewport(mode = INTERACTION_MODE.NAVIGATION) {
     }
   }, [])
 
+  const applyTransform = useCallback(
+    (next) => {
+      const clamped = clampTranslate(next.x, next.y, next.scale)
+      setTransform({ x: clamped.x, y: clamped.y, scale: next.scale })
+    },
+    [clampTranslate],
+  )
+
   const fitToViewport = useCallback(() => {
     const viewport = viewportRef.current
     if (!viewport) return
@@ -66,63 +83,177 @@ export function useViewport(mode = INTERACTION_MODE.NAVIGATION) {
     }
   }, [])
 
-  const handlePointerDown = useCallback((event) => {
-    if (modeRef.current !== INTERACTION_MODE.NAVIGATION || event.button !== 0) {
+  const clearInteraction = useCallback(() => {
+    pointersRef.current.clear()
+    panRef.current = null
+    pinchRef.current = null
+    setIsPanning(false)
+  }, [])
+
+  const beginPinch = useCallback((viewport) => {
+    const rect = viewport.getBoundingClientRect()
+    const metrics = getPointerPairMetrics(pointersRef.current, rect)
+    if (!metrics || metrics.distance < 2) return
+
+    panRef.current = null
+    setIsPanning(false)
+
+    pinchRef.current = {
+      startDistance: metrics.distance,
+      startCenterX: metrics.centerX,
+      startCenterY: metrics.centerY,
+      startTransform: { ...transformRef.current },
+    }
+  }, [])
+
+  const handlePointerDown = useCallback(
+    (event) => {
+      if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
+      if (event.pointerType === 'mouse' && event.button !== 0) return
+
+      event.preventDefault()
+
+      const viewport = viewportRef.current
+      if (!viewport) return
+
+      pointersRef.current.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+      })
+
+      if (pointersRef.current.size === 1) {
+        pinchRef.current = null
+        panRef.current = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          originX: transformRef.current.x,
+          originY: transformRef.current.y,
+        }
+        setIsPanning(true)
+        return
+      }
+
+      if (pointersRef.current.size === 2) {
+        beginPinch(viewport)
+      }
+    },
+    [beginPinch],
+  )
+
+  const handlePointerMove = useCallback(
+    (event) => {
+      if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
+      if (!pointersRef.current.has(event.pointerId)) return
+
+      event.preventDefault()
+
+      pointersRef.current.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+      })
+
+      const viewport = viewportRef.current
+      if (!viewport) return
+
+      if (pointersRef.current.size >= 2) {
+        if (!pinchRef.current) {
+          beginPinch(viewport)
+        }
+
+        const pinch = pinchRef.current
+        if (!pinch) return
+
+        const rect = viewport.getBoundingClientRect()
+        const metrics = getPointerPairMetrics(pointersRef.current, rect)
+        if (!metrics || metrics.distance < 2) return
+
+        const nextScale = clamp(
+          pinch.startTransform.scale *
+            (metrics.distance / pinch.startDistance),
+          MIN_ZOOM,
+          MAX_ZOOM,
+        )
+
+        const zoomed = zoomAtViewportPoint(
+          pinch.startTransform,
+          metrics.centerX,
+          metrics.centerY,
+          nextScale,
+        )
+
+        const panDx = metrics.centerX - pinch.startCenterX
+        const panDy = metrics.centerY - pinch.startCenterY
+
+        applyTransform({
+          x: zoomed.x + panDx,
+          y: zoomed.y + panDy,
+          scale: nextScale,
+        })
+        return
+      }
+
+      const pan = panRef.current
+      if (!pan || pan.pointerId !== event.pointerId) return
+
+      const dx = event.clientX - pan.startX
+      const dy = event.clientY - pan.startY
+      const next = clampTranslate(
+        pan.originX + dx,
+        pan.originY + dy,
+        transformRef.current.scale,
+      )
+
+      setTransform((prev) => ({ ...prev, x: next.x, y: next.y }))
+    },
+    [applyTransform, beginPinch, clampTranslate],
+  )
+
+  const handlePointerUp = useCallback((event) => {
+    pointersRef.current.delete(event.pointerId)
+
+    const pan = panRef.current
+    if (pan?.pointerId === event.pointerId) {
+      panRef.current = null
+      setIsPanning(false)
+    }
+
+    if (pointersRef.current.size < 2) {
+      pinchRef.current = null
+    }
+
+    if (pointersRef.current.size === 1) {
+      const [remainingId, remaining] = [...pointersRef.current.entries()][0]
+      panRef.current = {
+        pointerId: remainingId,
+        startX: remaining.x,
+        startY: remaining.y,
+        originX: transformRef.current.x,
+        originY: transformRef.current.y,
+      }
+      setIsPanning(true)
       return
     }
 
-    event.preventDefault()
-    event.currentTarget.setPointerCapture(event.pointerId)
-    panRef.current = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      originX: transform.x,
-      originY: transform.y,
+    if (pointersRef.current.size === 0) {
+      panRef.current = null
+      pinchRef.current = null
+      setIsPanning(false)
     }
-    setIsPanning(true)
-  }, [transform.x, transform.y])
-
-  const handlePointerMove = useCallback((event) => {
-    if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
-
-    const pan = panRef.current
-    if (!pan || pan.pointerId !== event.pointerId) return
-
-    const dx = event.clientX - pan.startX
-    const dy = event.clientY - pan.startY
-    const next = clampTranslate(
-      pan.originX + dx,
-      pan.originY + dy,
-      transform.scale,
-    )
-
-    setTransform((prev) => ({ ...prev, x: next.x, y: next.y }))
-  }, [clampTranslate, transform.scale])
-
-  const handlePointerUp = useCallback((event) => {
-    const pan = panRef.current
-    if (!pan || pan.pointerId !== event.pointerId) return
-
-    panRef.current = null
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId)
-    }
-    setIsPanning(false)
   }, [])
 
   useEffect(() => {
     if (isNavigation) return
-
-    panRef.current = null
-    setIsPanning(false)
-  }, [isNavigation])
+    clearInteraction()
+  }, [isNavigation, clearInteraction])
 
   useEffect(() => {
     const viewport = viewportRef.current
     if (!viewport) return
 
     function handleWheel(event) {
+      if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
+
       event.preventDefault()
 
       const rect = viewport.getBoundingClientRect()
@@ -136,12 +267,8 @@ export function useViewport(mode = INTERACTION_MODE.NAVIGATION) {
           MAX_ZOOM,
         )
 
-        const worldX = (pointerX - prev.x) / prev.scale
-        const worldY = (pointerY - prev.y) / prev.scale
-
-        const rawX = pointerX - worldX * nextScale
-        const rawY = pointerY - worldY * nextScale
-        const next = clampTranslate(rawX, rawY, nextScale)
+        const zoomed = zoomAtViewportPoint(prev, pointerX, pointerY, nextScale)
+        const next = clampTranslate(zoomed.x, zoomed.y, nextScale)
 
         return { x: next.x, y: next.y, scale: nextScale }
       })

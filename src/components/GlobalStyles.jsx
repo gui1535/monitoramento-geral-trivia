@@ -6,7 +6,13 @@ const radioOkRgb = '0, 255, 72'
 
 const globalCss = `
   *, *::before, *::after { box-sizing: border-box; }
-  html, body, #root { width: 100%; height: 100%; margin: 0; }
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+  }
   button { font: inherit; }
 
   @keyframes monitoramento-led-blink {

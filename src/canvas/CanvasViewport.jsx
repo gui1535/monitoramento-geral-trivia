@@ -81,7 +81,7 @@ export function CanvasViewport({ mode = INTERACTION_MODE.NAVIGATION, toolbar, ch
   const cursor = getCanvasCursor(mode, isPanning)
 
   return (
-    <div ref={viewportRef} style={viewportStyle}>
+    <div ref={viewportRef} style={viewportStyle} {...handlers}>
       <div style={chromeStyle}>{toolbar}</div>
 
       <div
@@ -90,7 +90,6 @@ export function CanvasViewport({ mode = INTERACTION_MODE.NAVIGATION, toolbar, ch
           cursor,
           transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
         }}
-        {...handlers}
       >
         {children}
       </div>
