@@ -1,0 +1,1467 @@
+{
+  "nodes": [],
+  "links": [
+    {
+      "id": "cabo-1",
+      "nome": "cabo-1",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-2",
+      "nome": "cabo-2",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-3",
+      "nome": "cabo-3",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-4",
+      "nome": "cabo-4",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-5",
+      "nome": "cabo-5",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-6",
+      "nome": "cabo-6",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-7"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-7",
+      "nome": "cabo-7",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-8"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-8",
+      "nome": "cabo-8",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-9"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-9",
+      "nome": "cabo-9",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-10"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-10",
+      "nome": "cabo-10",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-11"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-11",
+      "nome": "cabo-11",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-12"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-12",
+      "nome": "cabo-12",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-13"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-13",
+      "nome": "cabo-13",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-14"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-14",
+      "nome": "cabo-14",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-15"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-15",
+      "nome": "cabo-15",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-81",
+        "cabo-68"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-16",
+      "nome": "cabo-16",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-17",
+      "nome": "cabo-17",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-18",
+      "nome": "cabo-18",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-19"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-19",
+      "nome": "cabo-19",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-20"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-20",
+      "nome": "cabo-20",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-21"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-21",
+      "nome": "cabo-21",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-22"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-22",
+      "nome": "cabo-22",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-82",
+        "cabo-23"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-23",
+      "nome": "cabo-23",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-24",
+      "nome": "cabo-24",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-40"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-25",
+      "nome": "cabo-25",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-26",
+      "nome": "cabo-26",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-70",
+        "cabo-79",
+        "cabo-80",
+        "cabo-24"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-27",
+      "nome": "cabo-27",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-26"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-28",
+      "nome": "cabo-28",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-29",
+      "nome": "cabo-29",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-30",
+      "nome": "cabo-30",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-31",
+      "nome": "cabo-31",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-77",
+        "cabo-30",
+        "cabo-29",
+        "cabo-28",
+        "cabo-78"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-32",
+      "nome": "cabo-32",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-31"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-33",
+      "nome": "cabo-33",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-32"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-34",
+      "nome": "cabo-34",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-35",
+      "nome": "cabo-35",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-36",
+      "nome": "cabo-36",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-37",
+      "nome": "cabo-37",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-75",
+        "cabo-36",
+        "cabo-35",
+        "cabo-76"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-38",
+      "nome": "cabo-38",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-37",
+        "cabo-74"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-39",
+      "nome": "cabo-39",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-40",
+      "nome": "cabo-40",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-41"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-41",
+      "nome": "cabo-41",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-42"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-42",
+      "nome": "cabo-42",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-43"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-43",
+      "nome": "cabo-43",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-44"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-44",
+      "nome": "cabo-44",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-45"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-45",
+      "nome": "cabo-45",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-46"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-46",
+      "nome": "cabo-46",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-47"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-47",
+      "nome": "cabo-47",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-48"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-48",
+      "nome": "cabo-48",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": true,
+      "radios": {
+        "lines": [
+          "radio-1",
+          "radio-2",
+          "radio-4",
+          "radio-5",
+          "radio-6"
+        ],
+        "textos": [
+          "texto-torre-estudantes",
+          "texto-torre-paranapiacaba",
+          "texto-torre-bras",
+          "texto-torre-jaragua"
+        ],
+        "imgs": [
+          "img-torre-estudantes",
+          "img-torre-paranapiacaba",
+          "img-torre-bras",
+          "img-torre-jaragua"
+        ]
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-49",
+      "nome": "cabo-49",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-50"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-50",
+      "nome": "cabo-50",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-51"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-51",
+      "nome": "cabo-51",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-52",
+        "cabo-73"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-52",
+      "nome": "cabo-52",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-53"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-53",
+      "nome": "cabo-53",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-54"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-54",
+      "nome": "cabo-54",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-55"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-55",
+      "nome": "cabo-55",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-56"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-56",
+      "nome": "cabo-56",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-57"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-57",
+      "nome": "cabo-57",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-58"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-58",
+      "nome": "cabo-58",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-59"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-59",
+      "nome": "cabo-59",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-60"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-60",
+      "nome": "cabo-60",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-61"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-61",
+      "nome": "cabo-61",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-62"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-62",
+      "nome": "cabo-62",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-63"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-63",
+      "nome": "cabo-63",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-64"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-64",
+      "nome": "cabo-64",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-65"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-65",
+      "nome": "cabo-65",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-66"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-66",
+      "nome": "cabo-66",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": true,
+      "radios": {
+        "lines": [
+          "radio-6",
+          "radio-5",
+          "radio-4",
+          "radio-3",
+          "radio-2"
+        ],
+        "textos": [
+          "texto-torre-estudantes",
+          "texto-torre-paranapiacaba",
+          "texto-torre-bras",
+          "texto-torre-jaragua"
+        ],
+        "imgs": [
+          "img-torre-estudantes",
+          "img-torre-paranapiacaba",
+          "img-torre-bras",
+          "img-torre-jaragua"
+        ]
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-67",
+      "nome": "cabo-67",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-68",
+      "nome": "cabo-68",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-69",
+      "nome": "cabo-69",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-70",
+      "nome": "cabo-70",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-71",
+      "nome": "cabo-71",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-72",
+      "nome": "cabo-72",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-73",
+      "nome": "cabo-73",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-74",
+      "nome": "cabo-74",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-6"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-75",
+      "nome": "cabo-75",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-76",
+      "nome": "cabo-76",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-33"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-77",
+      "nome": "cabo-77",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-78",
+      "nome": "cabo-78",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-27"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-79",
+      "nome": "cabo-79",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-80",
+      "nome": "cabo-80",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-81",
+      "nome": "cabo-81",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [
+        "cabo-18"
+      ],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    },
+    {
+      "id": "cabo-82",
+      "nome": "cabo-82",
+      "from": "",
+      "to": "",
+      "principal": false,
+      "derruba": [],
+      "fim": false,
+      "radios": {
+        "lines": [],
+        "textos": [],
+        "imgs": []
+      },
+      "equipamentosAfetados": [],
+      "observacao": ""
+    }
+  ]
+}

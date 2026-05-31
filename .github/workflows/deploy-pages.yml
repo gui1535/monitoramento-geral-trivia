@@ -39,6 +39,8 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      # Mesmo resultado que: npm run build:pages (com VITE_BASE_PATH do repositório)
+
       - name: Verificar build
         run: |
           if grep -q 'src/main.jsx' dist/index.html; then
