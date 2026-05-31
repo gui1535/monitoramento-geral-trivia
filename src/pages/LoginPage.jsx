@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { colors } from '../styles/tokens'
+import { withBaseUrl } from '../utils/baseUrl'
 
 const pageStyle = {
   width: '100%',
@@ -52,7 +53,7 @@ export function LoginPage() {
   return (
     <main style={pageStyle}>
       <form style={cardStyle} onSubmit={handleSubmit}>
-        <img src="/logotipo-azul.png" alt="Trivia" style={logoStyle} />
+        <img src={withBaseUrl('logotipo-azul.png')} alt="Trivia" style={logoStyle} />
         <button
           type="submit"
           style={{

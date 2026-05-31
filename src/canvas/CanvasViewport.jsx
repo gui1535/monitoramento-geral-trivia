@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { colors } from '../styles/tokens'
+import { INTERACTION_MODE } from './constants'
+import { getCanvasCursor } from './interaction'
 import { useViewport } from './useViewport'
 
 const viewportStyle = {
@@ -10,6 +12,13 @@ const viewportStyle = {
   touchAction: 'none',
   userSelect: 'none',
   background: colors.canvasBg,
+}
+
+const chromeStyle = {
+  position: 'absolute',
+  inset: 0,
+  zIndex: 20,
+  pointerEvents: 'none',
 }
 
 const stageStyle = {
@@ -24,6 +33,10 @@ const hudStyle = {
   position: 'absolute',
   right: 16,
   bottom: 16,
+  zIndex: 20,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
   padding: '6px 10px',
   borderRadius: 6,
   fontSize: 12,
@@ -35,30 +48,56 @@ const hudStyle = {
   pointerEvents: 'none',
 }
 
-export function CanvasViewport({ children }) {
-  const { transform, isPanning, viewportRef, centerView, handlers } =
-    useViewport()
+const modeLabels = {
+  [INTERACTION_MODE.NAVIGATION]: 'Navegação',
+  [INTERACTION_MODE.ACTION]: 'Ação',
+}
+
+export function CanvasViewport({ mode = INTERACTION_MODE.NAVIGATION, toolbar, children }) {
+  const { transform, isPanning, viewportRef, fitToViewport, handlers } =
+    useViewport(mode)
 
   useEffect(() => {
-    centerView()
-  }, [centerView])
+    const viewport = viewportRef.current
+    if (!viewport) return
+
+    let fitted = false
+
+    const observer = new ResizeObserver(() => {
+      if (fitted || viewport.clientWidth === 0 || viewport.clientHeight === 0) {
+        return
+      }
+
+      fitToViewport()
+      fitted = true
+      observer.disconnect()
+    })
+
+    observer.observe(viewport)
+
+    return () => observer.disconnect()
+  }, [fitToViewport, viewportRef])
+
+  const cursor = getCanvasCursor(mode, isPanning)
 
   return (
-    <div
-      ref={viewportRef}
-      style={{ ...viewportStyle, cursor: isPanning ? 'grabbing' : 'grab' }}
-      {...handlers}
-    >
+    <div ref={viewportRef} style={viewportStyle}>
+      <div style={chromeStyle}>{toolbar}</div>
+
       <div
         style={{
           ...stageStyle,
+          cursor,
           transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
         }}
+        {...handlers}
       >
         {children}
       </div>
 
       <div style={hudStyle} aria-hidden="true">
+        <span>{modeLabels[mode]}</span>
+        <span>·</span>
         <span>{Math.round(transform.scale * 100)}%</span>
       </div>
     </div>

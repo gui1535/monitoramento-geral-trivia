@@ -1,16 +1,16 @@
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from './constants'
+import { CanvasDiagramBase } from './CanvasDiagramBase'
+import { CanvasOverlay } from './CanvasOverlay'
 import { colors } from '../styles/tokens'
 
 const worldStyle = {
   position: 'relative',
+  overflow: 'hidden',
   backgroundColor: colors.canvasWorld,
-  backgroundImage:
-    'radial-gradient(circle at 1px 1px, rgba(18, 20, 26, 0.1) 1px, transparent 0)',
-  backgroundSize: '24px 24px',
-  boxShadow: '0 2px 8px rgba(18, 20, 26, 0.12)',
+  boxShadow: '0 2px 8px rgba(18, 20, 26, 0.08)',
 }
 
-export function CanvasWorld({ children }) {
+export function CanvasWorld({ overlay = null, onSvgReady, interactionMode }) {
   return (
     <div
       style={{
@@ -19,7 +19,11 @@ export function CanvasWorld({ children }) {
         height: CANVAS_HEIGHT,
       }}
     >
-      {children}
+      <CanvasDiagramBase
+        onSvgReady={onSvgReady}
+        interactionMode={interactionMode}
+      />
+      <CanvasOverlay>{overlay}</CanvasOverlay>
     </div>
   )
 }

@@ -2,21 +2,27 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
-  DEFAULT_ZOOM,
+  INTERACTION_MODE,
   MAX_ZOOM,
   MIN_ZOOM,
   ZOOM_WHEEL_FACTOR,
 } from './constants'
+import { computeFitTransform } from './interaction'
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
 }
 
-export function useViewport() {
+export function useViewport(mode = INTERACTION_MODE.NAVIGATION) {
+  const modeRef = useRef(mode)
+  modeRef.current = mode
+
+  const isNavigation = mode === INTERACTION_MODE.NAVIGATION
+
   const [transform, setTransform] = useState({
     x: 0,
     y: 0,
-    scale: DEFAULT_ZOOM,
+    scale: 1,
   })
   const [isPanning, setIsPanning] = useState(false)
 
@@ -43,9 +49,29 @@ export function useViewport() {
     }
   }, [])
 
-  const handlePointerDown = useCallback((event) => {
-    if (event.button !== 0) return
+  const fitToViewport = useCallback(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
 
+    const next = computeFitTransform(
+      viewport.clientWidth,
+      viewport.clientHeight,
+      CANVAS_WIDTH,
+      CANVAS_HEIGHT,
+      { minZoom: MIN_ZOOM, maxZoom: MAX_ZOOM },
+    )
+
+    if (next) {
+      setTransform(next)
+    }
+  }, [])
+
+  const handlePointerDown = useCallback((event) => {
+    if (modeRef.current !== INTERACTION_MODE.NAVIGATION || event.button !== 0) {
+      return
+    }
+
+    event.preventDefault()
     event.currentTarget.setPointerCapture(event.pointerId)
     panRef.current = {
       pointerId: event.pointerId,
@@ -57,43 +83,40 @@ export function useViewport() {
     setIsPanning(true)
   }, [transform.x, transform.y])
 
-  const handlePointerMove = useCallback(
-    (event) => {
-      const pan = panRef.current
-      if (!pan || pan.pointerId !== event.pointerId) return
+  const handlePointerMove = useCallback((event) => {
+    if (modeRef.current !== INTERACTION_MODE.NAVIGATION) return
 
-      const dx = event.clientX - pan.startX
-      const dy = event.clientY - pan.startY
-      const next = clampTranslate(
-        pan.originX + dx,
-        pan.originY + dy,
-        transform.scale,
-      )
+    const pan = panRef.current
+    if (!pan || pan.pointerId !== event.pointerId) return
 
-      setTransform((prev) => ({ ...prev, x: next.x, y: next.y }))
-    },
-    [clampTranslate, transform.scale],
-  )
+    const dx = event.clientX - pan.startX
+    const dy = event.clientY - pan.startY
+    const next = clampTranslate(
+      pan.originX + dx,
+      pan.originY + dy,
+      transform.scale,
+    )
+
+    setTransform((prev) => ({ ...prev, x: next.x, y: next.y }))
+  }, [clampTranslate, transform.scale])
 
   const handlePointerUp = useCallback((event) => {
     const pan = panRef.current
     if (!pan || pan.pointerId !== event.pointerId) return
 
     panRef.current = null
-    event.currentTarget.releasePointerCapture(event.pointerId)
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
     setIsPanning(false)
   }, [])
 
-  const centerView = useCallback(() => {
-    const viewport = viewportRef.current
-    if (!viewport) return
+  useEffect(() => {
+    if (isNavigation) return
 
-    const scale = DEFAULT_ZOOM
-    const x = (viewport.clientWidth - CANVAS_WIDTH * scale) / 2
-    const y = (viewport.clientHeight - CANVAS_HEIGHT * scale) / 2
-
-    setTransform({ x, y, scale })
-  }, [])
+    panRef.current = null
+    setIsPanning(false)
+  }, [isNavigation])
 
   useEffect(() => {
     const viewport = viewportRef.current
@@ -128,16 +151,20 @@ export function useViewport() {
     return () => viewport.removeEventListener('wheel', handleWheel)
   }, [clampTranslate])
 
+  const panHandlers = isNavigation
+    ? {
+        onPointerDown: handlePointerDown,
+        onPointerMove: handlePointerMove,
+        onPointerUp: handlePointerUp,
+        onPointerCancel: handlePointerUp,
+      }
+    : {}
+
   return {
     transform,
-    isPanning,
+    isPanning: isNavigation && isPanning,
     viewportRef,
-    centerView,
-    handlers: {
-      onPointerDown: handlePointerDown,
-      onPointerMove: handlePointerMove,
-      onPointerUp: handlePointerUp,
-      onPointerCancel: handlePointerUp,
-    },
+    fitToViewport,
+    handlers: panHandlers,
   }
 }
