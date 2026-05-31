@@ -29,6 +29,8 @@ Ex.: [https://gui1535.github.io/monitoramento-geral-trivia/](https://gui1535.git
 
 O workflow está em `.github/workflows/deploy-pages.yml`.
 
+O `public/404.html` redireciona rotas como `/monitoramento` de volta ao `index.html` para o refresh funcionar no GitHub Pages.
+
 ### Preview local do build de produção
 
 ```bash
