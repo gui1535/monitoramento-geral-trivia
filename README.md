@@ -9,35 +9,40 @@ npm install
 npm run dev
 ```
 
-Abra [http://localhost:5173/](http://localhost:5173/).
+Abra [http://localhost:5173/](http://localhost:5173/) (entrada: `index.dev.html`).
 
-A API `PUT /api/config-fibra` só existe em desenvolvimento (`npm run dev`). Em preview/produção o app lê `public/config-fibra.json`.
+A API `PUT /api/config-fibra` só existe em desenvolvimento. Em produção o app lê `config-fibra.json`.
 
 ## GitHub Pages
 
 **URL:** [https://gui1535.github.io/monitoramento-geral-trivia/](https://gui1535.github.io/monitoramento-geral-trivia/)
 
-### Configuração (uma vez)
+### Configuração no GitHub
 
-1. **Settings** → **Pages**
-2. **Source:** Deploy from a branch
-3. **Branch:** `main` · pasta **`/docs`** → **Save**
+**Settings → Pages:**
 
-> Não use a pasta **`/` (root)** na branch `main`. Isso publica o código-fonte e gera erro em `/src/main.jsx` e `%BASE_URL%`.
+| Opção | Valor |
+|--------|--------|
+| Source | Deploy from a branch |
+| Branch | `main` |
+| Folder | **`/ (root)`** ou **`/docs`** (os dois funcionam após o deploy) |
 
-4. Faça **push** na `main` (fora da pasta `docs/`)
-5. Em **Actions**, aguarde **Deploy GitHub Pages** (verde) — ele roda `npm run build` e grava o resultado em `docs/`
-6. Abra **https://gui1535.github.io/monitoramento-geral-trivia/**
+O arquivo **`index.html` na raiz** do repositório é o **build de produção** (não edite à mão).  
+Desenvolvimento usa **`index.dev.html`**.
 
-### Se ainda aparecer `src/main.jsx` ou `%BASE_URL%`
-
-- Confirme em Pages: branch **`main`**, pasta **`/docs`** (não `/`)
-- Veja se o último commit em `docs/index.html` contém `/assets/index-....js` (não `/src/main.jsx`)
-- Limpe o cache do navegador (Ctrl+Shift+R)
-
-### Preview local do build
+### Publicar
 
 ```bash
-VITE_BASE_PATH=/monitoramento-geral-trivia/ npm run build
-npm run preview
+VITE_BASE_PATH=/monitoramento-geral-trivia/ npm run build:pages
+git add index.html index.dev.html 404.html assets/ docs/ scripts/ package.json vite.config.js .github/ favicon.svg config-fibra.json esquema-gerencia.svg logotipo-*.png .nojekyll
+git commit -m "deploy: corrige GitHub Pages na raiz do repositório"
+git push
 ```
+
+Ou: push na `main` → o workflow **Deploy GitHub Pages** gera os arquivos automaticamente.
+
+### Se ainda aparecer `src/main.jsx`
+
+1. Confirme no GitHub que `index.html` na **raiz** contém `/assets/index-`, não `/src/main.jsx`
+2. Aguarde 1–2 min após o push
+3. Ctrl+Shift+R no navegador

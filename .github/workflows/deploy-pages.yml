@@ -5,6 +5,14 @@ on:
     branches: [main]
     paths-ignore:
       - 'docs/**'
+      - 'assets/**'
+      - 'index.html'
+      - '404.html'
+      - 'favicon.svg'
+      - 'config-fibra.json'
+      - 'esquema-gerencia.svg'
+      - 'logotipo-*.png'
+      - '.nojekyll'
   workflow_dispatch:
 
 permissions:
@@ -34,36 +42,30 @@ jobs:
           else
             echo "VITE_BASE_PATH=/${REPO}/" >> "$GITHUB_ENV"
           fi
-          echo "VITE_BASE_PATH=${VITE_BASE_PATH}"
 
       - run: npm ci
-      - run: npm run build
-
-      # Mesmo resultado que: npm run build:pages (com VITE_BASE_PATH do repositório)
+      - run: npm run build:pages
 
       - name: Verificar build
         run: |
-          if grep -q 'src/main.jsx' dist/index.html; then
-            echo "ERRO: build inválido (ainda aponta para src/main.jsx)"
-            exit 1
-          fi
-          if grep -q '%BASE_URL%' dist/index.html; then
-            echo "ERRO: build inválido (%BASE_URL% não foi substituído)"
-            exit 1
-          fi
-          echo "index.html gerado:"
-          cat dist/index.html
+          grep -q 'src/main.jsx' index.html && exit 1 || true
+          grep -q '/assets/' index.html
+          head -12 index.html
 
-      - name: Copiar build para docs/
-        run: |
-          rm -rf docs
-          cp -r dist docs
-          cp dist/index.html docs/404.html
-
-      - name: Commit docs/ na main
+      - name: Commit arquivos do Pages
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'deploy: atualiza docs/ para GitHub Pages'
+          commit_message: 'deploy: atualiza build na raiz e em docs/'
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          file_pattern: docs/**
+          file_pattern: |
+            docs/**
+            index.html
+            404.html
+            assets/**
+            favicon.svg
+            config-fibra.json
+            esquema-gerencia.svg
+            logotipo-azul.png
+            logotipo-branco.png
+            .nojekyll
