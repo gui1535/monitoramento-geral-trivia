@@ -15,36 +15,29 @@ A API `PUT /api/config-fibra` só existe em desenvolvimento (`npm run dev`). Em 
 
 ## GitHub Pages
 
-Publicação automática no push na branch `main`.
+**URL:** [https://gui1535.github.io/monitoramento-geral-trivia/](https://gui1535.github.io/monitoramento-geral-trivia/)
 
-**URL (projeto):** `https://<seu-usuario>.github.io/<nome-do-repositorio>/`  
-Ex.: [https://gui1535.github.io/monitoramento-geral-trivia/](https://gui1535.github.io/monitoramento-geral-trivia/)
+### Configuração (uma vez)
 
-### Ativar no repositório (uma vez)
+1. **Settings** → **Pages**
+2. **Source:** Deploy from a branch
+3. **Branch:** `main` · pasta **`/docs`** → **Save**
 
-1. Faça **push** na `main` e aguarde o workflow **Deploy GitHub Pages** terminar (verde) em **Actions**
-2. GitHub → **Settings** → **Pages**
-3. **Build and deployment** → **Source:** **Deploy from a branch**
-4. **Branch:** `gh-pages` · pasta **`/ (root)`** → **Save**
+> Não use a pasta **`/` (root)** na branch `main`. Isso publica o código-fonte e gera erro em `/src/main.jsx` e `%BASE_URL%`.
 
-> **Importante:** não use a branch `main` na raiz `/`. Isso publica o código-fonte e causa o erro `src/main.jsx` com MIME `text/html`.
+4. Faça **push** na `main` (fora da pasta `docs/`)
+5. Em **Actions**, aguarde **Deploy GitHub Pages** (verde) — ele roda `npm run build` e grava o resultado em `docs/`
+6. Abra **https://gui1535.github.io/monitoramento-geral-trivia/**
 
-5. Abra a URL do repositório, por exemplo:  
-   **https://gui1535.github.io/monitoramento-geral-trivia/**  
-   (não use só `https://gui1535.github.io/` — essa é a página do usuário, outro site)
+### Se ainda aparecer `src/main.jsx` ou `%BASE_URL%`
 
-O workflow está em `.github/workflows/deploy-pages.yml`.
+- Confirme em Pages: branch **`main`**, pasta **`/docs`** (não `/`)
+- Veja se o último commit em `docs/index.html` contém `/assets/index-....js` (não `/src/main.jsx`)
+- Limpe o cache do navegador (Ctrl+Shift+R)
 
-### Preview local do build de produção
-
-```bash
-npm run build
-npm run preview
-```
+### Preview local do build
 
 ```bash
 VITE_BASE_PATH=/monitoramento-geral-trivia/ npm run build
 npm run preview
 ```
-
-Abra a URL que o `vite preview` mostrar (com o mesmo prefixo do repositório).

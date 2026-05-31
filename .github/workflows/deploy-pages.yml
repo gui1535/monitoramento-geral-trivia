@@ -3,6 +3,8 @@ name: Deploy GitHub Pages
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
@@ -32,23 +34,34 @@ jobs:
           else
             echo "VITE_BASE_PATH=/${REPO}/" >> "$GITHUB_ENV"
           fi
-          echo "Base: ${VITE_BASE_PATH:-/}"
+          echo "VITE_BASE_PATH=${VITE_BASE_PATH}"
 
       - run: npm ci
       - run: npm run build
 
-      - name: Verificar build (não publicar código-fonte)
+      - name: Verificar build
         run: |
           if grep -q 'src/main.jsx' dist/index.html; then
-            echo "ERRO: dist/index.html ainda aponta para src/main.jsx"
+            echo "ERRO: build inválido (ainda aponta para src/main.jsx)"
             exit 1
           fi
-          echo "OK: dist/index.html"
-          head -15 dist/index.html
+          if grep -q '%BASE_URL%' dist/index.html; then
+            echo "ERRO: build inválido (%BASE_URL% não foi substituído)"
+            exit 1
+          fi
+          echo "index.html gerado:"
+          cat dist/index.html
 
-      - name: Publicar dist na branch gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Copiar build para docs/
+        run: |
+          rm -rf docs
+          cp -r dist docs
+          cp dist/index.html docs/404.html
+
+      - name: Commit docs/ na main
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          force_orphan: true
+          commit_message: 'deploy: atualiza docs/ para GitHub Pages'
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          file_pattern: docs/**
