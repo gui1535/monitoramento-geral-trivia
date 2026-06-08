@@ -521,7 +521,7 @@
         "cabo-40"
       ],
       "volta": [
-        "cabo-26"
+        "cabo-80"
       ],
       "derruba": [
         "cabo-40"
@@ -772,9 +772,7 @@
       "to": "",
       "principal": false,
       "ida": [],
-      "volta": [
-        "cabo-37"
-      ],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -792,9 +790,7 @@
       "to": "",
       "principal": false,
       "ida": [],
-      "volta": [
-        "cabo-37"
-      ],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -817,9 +813,7 @@
         "cabo-35",
         "cabo-76"
       ],
-      "volta": [
-        "cabo-38"
-      ],
+      "volta": [],
       "derruba": [
         "cabo-75",
         "cabo-36",
@@ -1782,7 +1776,10 @@
         "cabo-27"
       ],
       "volta": [
-        "cabo-31"
+        "cabo-30",
+        "cabo-29",
+        "cabo-77",
+        "cabo-28"
       ],
       "derruba": [
         "cabo-27"
@@ -1824,7 +1821,9 @@
       "principal": false,
       "ida": [],
       "volta": [
-        "cabo-26"
+        "cabo-26",
+        "cabo-70",
+        "cabo-79"
       ],
       "derruba": [],
       "fim": false,
@@ -1879,6 +1878,338 @@
       },
       "equipamentosAfetados": [],
       "observacao": ""
+    }
+  ],
+  "urRules": [
+    {
+      "ur": 1,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-1"
+      ]
+    },
+    {
+      "ur": 2,
+      "habilitado": true,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-1",
+        "cabo-ur-2",
+        "cabo-54",
+        "cabo-55"
+      ]
+    },
+    {
+      "ur": 3,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-2",
+        "cabo-ur-3"
+      ]
+    },
+    {
+      "ur": 4,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-3",
+        "cabo-ur-4"
+      ]
+    },
+    {
+      "ur": 5,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-4",
+        "cabo-ur-5"
+      ]
+    },
+    {
+      "ur": 6,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-5",
+        "cabo-ur-6"
+      ]
+    },
+    {
+      "ur": 7,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-6",
+        "cabo-ur-7"
+      ]
+    },
+    {
+      "ur": 8,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-7",
+        "cabo-ur-8"
+      ]
+    },
+    {
+      "ur": 9,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-8",
+        "cabo-ur-9"
+      ]
+    },
+    {
+      "ur": 10,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-9",
+        "cabo-ur-10"
+      ]
+    },
+    {
+      "ur": 11,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-10",
+        "cabo-ur-11"
+      ]
+    },
+    {
+      "ur": 12,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-11",
+        "cabo-ur-12"
+      ]
+    },
+    {
+      "ur": 13,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-12",
+        "cabo-ur-13"
+      ]
+    },
+    {
+      "ur": 14,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-13",
+        "cabo-ur-14"
+      ]
+    },
+    {
+      "ur": 15,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-14",
+        "cabo-ur-15"
+      ]
+    },
+    {
+      "ur": 16,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-15",
+        "cabo-ur-16"
+      ]
+    },
+    {
+      "ur": 17,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-16",
+        "cabo-ur-17"
+      ]
+    },
+    {
+      "ur": 18,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-17",
+        "cabo-ur-18"
+      ]
+    },
+    {
+      "ur": 19,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-18",
+        "cabo-ur-19"
+      ]
+    },
+    {
+      "ur": 20,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-19",
+        "cabo-ur-20"
+      ]
+    },
+    {
+      "ur": 21,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-20",
+        "cabo-ur-21"
+      ]
+    },
+    {
+      "ur": 22,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-21",
+        "cabo-ur-22"
+      ]
+    },
+    {
+      "ur": 23,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-22",
+        "cabo-ur-23"
+      ]
+    },
+    {
+      "ur": 24,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-23",
+        "cabo-ur-24"
+      ]
+    },
+    {
+      "ur": 25,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-24",
+        "cabo-ur-25"
+      ]
+    },
+    {
+      "ur": 26,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-25",
+        "cabo-ur-26"
+      ]
+    },
+    {
+      "ur": 27,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-26",
+        "cabo-ur-27"
+      ]
+    },
+    {
+      "ur": 28,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-27",
+        "cabo-ur-28"
+      ]
+    },
+    {
+      "ur": 29,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-28",
+        "cabo-ur-29"
+      ]
+    },
+    {
+      "ur": 30,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-29",
+        "cabo-ur-30"
+      ]
+    },
+    {
+      "ur": 31,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-30",
+        "cabo-ur-31"
+      ]
+    },
+    {
+      "ur": 32,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-31"
+      ]
+    },
+    {
+      "ur": 33,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 34,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 35,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 36,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 37,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 38,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 39,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
     }
   ]
 }
