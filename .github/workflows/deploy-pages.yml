@@ -3,16 +3,16 @@ name: Deploy GitHub Pages
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - 'assets/**'
-      - 'index.html'
-      - '404.html'
-      - 'favicon.svg'
-      - 'config-fibra.json'
-      - 'esquema-gerencia.svg'
-      - 'logotipo-*.png'
-      - '.nojekyll'
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.js'
+      - 'index.dev.html'
+      - 'public/**'
+      - 'scripts/**'
+      - 'data/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
@@ -50,6 +50,11 @@ jobs:
         run: |
           grep -q 'src/main.jsx' index.html && exit 1 || true
           grep -q '/assets/' index.html
+          JS_FILE=$(grep -oE 'assets/index[^"]+\.js' index.html | head -1)
+          test -f "$JS_FILE"
+          grep -q 'Demo remota' "$JS_FILE"
+          grep -q 'peerjs.com' "$JS_FILE"
+          echo "Bundle OK: $JS_FILE"
           head -12 index.html
 
       - name: Commit arquivos do Pages
