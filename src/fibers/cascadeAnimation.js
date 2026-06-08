@@ -4,7 +4,17 @@ import {
   FIBER_STATUS_COLORS,
   normalizeFiberId,
 } from './fibers'
-import { FIBER_FALL_CLASS } from './fiberFailure'
+import {
+  buildCaminhoVoltaCompleto,
+  buildCaminhoVoltaParaRepintura,
+  getNetworkLink,
+  getLinkVolta,
+} from './fiberNetwork'
+import {
+  collectFibersInAlert,
+  FIBER_FALL_CLASS,
+  FIBER_REAL_FALL_CLASS,
+} from './fiberFailure'
 
 function getFiberElement(svgRoot, fiberId) {
   const id = normalizeFiberId(fiberId)
@@ -28,9 +38,28 @@ export function paintFiberAlert(svgRoot, fiberId) {
   if (!element) return
 
   storeOriginalStroke(element)
+  element.classList.remove(FIBER_REAL_FALL_CLASS)
   element.classList.add(FIBER_FALL_CLASS)
+  element.style.removeProperty('stroke-opacity')
+  element.removeAttribute('stroke-opacity')
 
   const color = FIBER_STATUS_COLORS[FIBER_STATUS.ALERT]
+  element.setAttribute('stroke', color)
+  element.style.setProperty('stroke', color, 'important')
+}
+
+export function paintFiberRealFall(svgRoot, fiberId) {
+  applyFiberUpdate(svgRoot, { id: fiberId, status: FIBER_STATUS.FALLEN })
+
+  const element = getFiberElement(svgRoot, fiberId)
+  if (!element) return
+
+  storeOriginalStroke(element)
+  element.classList.add(FIBER_FALL_CLASS, FIBER_REAL_FALL_CLASS)
+  element.style.removeProperty('stroke-opacity')
+  element.removeAttribute('stroke-opacity')
+
+  const color = FIBER_STATUS_COLORS[FIBER_STATUS.FALLEN]
   element.setAttribute('stroke', color)
   element.style.setProperty('stroke', color, 'important')
 }
@@ -38,115 +67,154 @@ export function paintFiberAlert(svgRoot, fiberId) {
 export function paintFiberActive(svgRoot, fiberId) {
   const element = getFiberElement(svgRoot, fiberId)
   if (element) {
-    element.classList.remove(FIBER_FALL_CLASS)
+    element.classList.remove(FIBER_FALL_CLASS, FIBER_REAL_FALL_CLASS)
   }
 
   applyFiberUpdate(svgRoot, { id: fiberId, status: FIBER_STATUS.ACTIVE })
 }
 
-export function runCascadeSimulation(svgRoot, resultado, options = {}) {
-  const {
-    intervalMs = 320,
-    onComplete,
-    onReachFim,
-    cabosJaEmErro = [],
-  } = options
+function getCaminhoVoltaFallback(ordem, ordemVolta, raiz) {
+  if (ordemVolta.length > 0) return ordemVolta
+  return ordem.filter((id) => id !== raiz).reverse()
+}
 
-  const ordemIda = resultado.ordem ?? []
-  const ordemVolta = resultado.ordemVolta ?? []
+/** Preenche vermelho contínuo no trecho de volta até o último ponto já marcado. */
+function preencherTrechoVermelhoVolta(vermelhos, raiz, caminhoVolta) {
+  const trechoVolta = raiz ? [raiz, ...caminhoVolta] : caminhoVolta
+  const indicesVolta = trechoVolta
+    .map((id, i) => (vermelhos.has(id) ? i : -1))
+    .filter((i) => i >= 0)
+
+  if (indicesVolta.length === 0) return
+
+  const ate = Math.max(...indicesVolta)
+  for (let i = 0; i <= ate; i++) {
+    if (trechoVolta[i]) vermelhos.add(trechoVolta[i])
+  }
+}
+
+/**
+ * Define cabos vermelhos: origem + trecho contínuo na ida/volta até cabos já caídos.
+ */
+export function resolveCabosVermelhos(
+  resultado,
+  cabosJaEmErro = [],
+  network = null,
+  cabosQueda = [],
+) {
+  const ordem = resultado.ordem ?? []
   const raiz = resultado.raiz
   const caboFim = resultado.caboFim
-
-  if (!svgRoot || ordemIda.length === 0) {
-    onComplete?.([...cabosJaEmErro])
-    return () => {}
-  }
-
-  let cancelled = false
-  let timerId = null
   const errosAnteriores = new Set(cabosJaEmErro)
-  const cabosVermelhos = new Set(errosAnteriores)
+  const realmenteCaidos = new Set([
+    ...errosAnteriores,
+    ...cabosQueda.filter(Boolean),
+  ])
+  const vermelhos = new Set()
+  const primeiraQueda = errosAnteriores.size === 0
 
-  errosAnteriores.forEach((fiberId) => paintFiberAlert(svgRoot, fiberId))
+  const caminhoVolta =
+    network && raiz
+      ? buildCaminhoVoltaCompleto(raiz, caboFim, network, cabosJaEmErro)
+      : getCaminhoVoltaFallback(ordem, resultado.ordemVolta ?? [], raiz)
 
-  function syncTodosVermelhos() {
-    cabosVermelhos.forEach((fiberId) => paintFiberAlert(svgRoot, fiberId))
-  }
+  if (primeiraQueda) {
+    // Primeira queda: ida até o fim em vermelho; retorno (volta) em verde.
+    ordem.forEach((id) => vermelhos.add(id))
 
-  function marcarVermelho(fiberId) {
-    cabosVermelhos.add(fiberId)
-    syncTodosVermelhos()
-  }
-
-  function marcarVerde(fiberId) {
-    if (errosAnteriores.has(fiberId)) return
-
-    cabosVermelhos.delete(fiberId)
-    paintFiberActive(svgRoot, fiberId)
-  }
-
-  function finalize() {
-    ordemIda.forEach((fiberId) => {
-      if (fiberId !== raiz) marcarVerde(fiberId)
-    })
-
-    cabosVermelhos.clear()
-    errosAnteriores.forEach((fiberId) => cabosVermelhos.add(fiberId))
-
-    if (raiz) {
-      cabosVermelhos.add(raiz)
+    if (network && raiz && caboFim) {
+      buildCaminhoVoltaParaRepintura(raiz, caboFim, network, []).forEach((id) => {
+        if (id !== raiz) vermelhos.delete(id)
+      })
     }
+  } else {
+    // Queda subsequente: trecho de volta até cabo já caído; ida à frente da raiz fica verde.
+    if (raiz) vermelhos.add(raiz)
 
-    syncTodosVermelhos()
-    onComplete?.([...cabosVermelhos])
-  }
-
-  function startVolta(indexVolta) {
-    if (cancelled) return
-
-    if (indexVolta >= ordemVolta.length) {
-      finalize()
-      return
-    }
-
-    marcarVerde(ordemVolta[indexVolta])
-
-    timerId = window.setTimeout(() => {
-      startVolta(indexVolta + 1)
-    }, intervalMs)
-  }
-
-  function startIda(indexIda) {
-    if (cancelled) return
-
-    if (indexIda >= ordemIda.length) {
-      if (ordemVolta.length > 0) {
-        startVolta(0)
-      } else {
-        finalize()
-      }
-      return
-    }
-
-    const fiberId = ordemIda[indexIda]
-    marcarVermelho(fiberId)
-
-    if (caboFim && fiberId === caboFim) {
-      onReachFim?.({
-        caboFim,
-        radios: resultado.radiosEvidentes,
+    if (raiz && network) {
+      getLinkVolta(getNetworkLink(network, raiz)).forEach((id) => {
+        if (id && id !== raiz) vermelhos.add(id)
       })
     }
 
-    timerId = window.setTimeout(() => {
-      startIda(indexIda + 1)
-    }, intervalMs)
+    errosAnteriores.forEach((id) => vermelhos.add(id))
+
+    caminhoVolta.forEach((id, i) => {
+      if (!errosAnteriores.has(id)) return
+      for (let j = 0; j <= i; j++) vermelhos.add(caminhoVolta[j])
+    })
+
+    preencherTrechoVermelhoVolta(vermelhos, raiz, caminhoVolta)
   }
 
-  startIda(0)
+  const caboIdentificado =
+    [...caminhoVolta].find((id) => errosAnteriores.has(id)) ??
+    ordem.find((id) => errosAnteriores.has(id)) ??
+    null
 
-  return () => {
-    cancelled = true
-    if (timerId) window.clearTimeout(timerId)
+  return {
+    cabosVermelhos: vermelhos,
+    cabosRealmenteCaidos: realmenteCaidos,
+    caboIdentificado,
+    caminhoVolta,
   }
+}
+
+/**
+ * Ida: caminho até o fim em vermelho; volta após o fim em verde (ou vermelho até cabo já caído).
+ */
+export function applyFiberFailureInstant(svgRoot, resultado, options = {}) {
+  const {
+    onComplete,
+    onReachFim,
+    cabosJaEmErro = [],
+    cabosQueda = [],
+    network = null,
+  } = options
+
+  const ordem = resultado.ordem ?? []
+  const raiz = resultado.raiz
+  const caboFim = resultado.caboFim
+
+  const { cabosVermelhos, cabosRealmenteCaidos, caminhoVolta } =
+    resolveCabosVermelhos(resultado, cabosJaEmErro, network, cabosQueda)
+
+  if (!svgRoot) {
+    onComplete?.([...cabosVermelhos], [...cabosRealmenteCaidos])
+    return () => {}
+  }
+
+  if (caboFim) {
+    onReachFim?.({
+      caboFim,
+      radios: resultado.radiosEvidentes,
+    })
+  }
+
+  const voltaParaRepintura =
+    network && raiz
+      ? buildCaminhoVoltaParaRepintura(raiz, caboFim, network, cabosJaEmErro)
+      : caminhoVolta
+
+  const previouslyMarked = svgRoot ? collectFibersInAlert(svgRoot) : []
+  const afetados = new Set([
+    ...previouslyMarked,
+    ...ordem,
+    ...caminhoVolta,
+    ...voltaParaRepintura,
+    ...cabosVermelhos,
+  ])
+
+  afetados.forEach((fiberId) => {
+    if (cabosRealmenteCaidos.has(fiberId)) {
+      paintFiberRealFall(svgRoot, fiberId)
+    } else if (cabosVermelhos.has(fiberId)) {
+      paintFiberAlert(svgRoot, fiberId)
+    } else {
+      paintFiberActive(svgRoot, fiberId)
+    }
+  })
+
+  onComplete?.([...cabosVermelhos], [...cabosRealmenteCaidos])
+  return () => {}
 }

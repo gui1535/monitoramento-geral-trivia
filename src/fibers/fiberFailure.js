@@ -1,7 +1,10 @@
 import { FIBER_STATUS, FIBER_STATUS_COLORS, normalizeFiberId } from './fibers'
 
 export const FIBER_FALL_CLASS = 'fibra-caida'
+export const FIBER_REAL_FALL_CLASS = 'fibra-queda-real'
 export const NODE_OFFLINE_CLASS = 'equipamento-sem-comunicacao'
+
+const FIBER_ALERT_CLASSES = [FIBER_FALL_CLASS, FIBER_REAL_FALL_CLASS]
 
 function getSvgScope(svgRoot) {
   return svgRoot instanceof SVGSVGElement
@@ -25,16 +28,31 @@ function storeOriginalNodePresentation(element) {
   }
 }
 
+export function collectFibersRealFall(svgRoot) {
+  const scope = getSvgScope(svgRoot)
+  if (!scope) return []
+
+  const ids = []
+  scope.querySelectorAll(`.${FIBER_REAL_FALL_CLASS}`).forEach((element) => {
+    if (element.id) ids.push(element.id)
+  })
+
+  return ids
+}
+
+/** Cabos em alerta (trecho afetado ou queda real). */
 export function collectFibersInAlert(svgRoot) {
   const scope = getSvgScope(svgRoot)
   if (!scope) return []
 
   const ids = []
-  scope.querySelectorAll(`.${FIBER_FALL_CLASS}`).forEach((element) => {
-    if (element.id) ids.push(element.id)
+  FIBER_ALERT_CLASSES.forEach((className) => {
+    scope.querySelectorAll(`.${className}`).forEach((element) => {
+      if (element.id) ids.push(element.id)
+    })
   })
 
-  return ids
+  return [...new Set(ids)]
 }
 
 export function applyFiberFailureVisual(svgRoot, { cabos = [], nodes = [] } = {}) {
@@ -67,14 +85,16 @@ export function clearFiberFailureVisual(svgRoot, { cabos = [], nodes = [] } = {}
 
   const scope = getSvgScope(svgRoot)
 
-  scope?.querySelectorAll(`.${FIBER_FALL_CLASS}`).forEach((element) => {
-    element.classList.remove(FIBER_FALL_CLASS)
+  FIBER_ALERT_CLASSES.forEach((className) => {
+    scope?.querySelectorAll(`.${className}`).forEach((element) => {
+      element.classList.remove(className)
 
-    const original = element.dataset.originalStroke
-    if (original) {
-      element.setAttribute('stroke', original)
-      element.style.setProperty('stroke', original, 'important')
-    }
+      const original = element.dataset.originalStroke
+      if (original) {
+        element.setAttribute('stroke', original)
+        element.style.setProperty('stroke', original, 'important')
+      }
+    })
   })
 
   if (nodes.length > 0) {

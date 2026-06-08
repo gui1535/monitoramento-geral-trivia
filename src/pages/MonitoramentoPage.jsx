@@ -1,7 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { DemoMobileScreen } from '../components/DemoMobileScreen'
+import { DemoPeerPanel } from '../components/DemoPeerPanel'
 import { FiberConfigPanel } from '../components/FiberConfigPanel'
-import { FiberTestFab } from '../components/FiberTestFab'
-import { RadioFunctioningAlert } from '../components/RadioFunctioningAlert'
+import { ErrorsPanel } from '../components/ErrorsPanel'
+import {
+  applyDemoSyncMessage,
+  createClearSimulationMessage,
+  createClearUrSemEnergiaMessage,
+  createFiberDropMessage,
+} from '../demo/demoSyncMessages'
+import { DEMO_PEER_ROLE, useDemoPeerSync } from '../demo/useDemoPeerSync'
+import { useMonitoringErrorLog } from '../errors/useMonitoringErrorLog'
 import { CanvasModeToolbar } from '../canvas/CanvasModeToolbar'
 import { CanvasViewport } from '../canvas/CanvasViewport'
 import { CanvasWorld } from '../canvas/CanvasWorld'
@@ -11,9 +20,11 @@ import { useFiberNetwork } from '../fibers/useFiberNetwork'
 import { useLedDiagram } from '../leds/leds'
 import { formatRadioFunctioningMessage, useRadioDiagram } from '../radios/radios'
 import { UrConfirmPopup } from '../components/UrConfirmPopup'
+import { UrRuleConfigPanel } from '../components/UrRuleConfigPanel'
+import { getUrRuleFromNetwork } from '../urs/urRules'
 import { useUrDiagram } from '../urs/urs'
+import { isMobileDevice } from '../utils/isMobileDevice'
 import { isTestModeEnabled } from '../utils/testMode'
-
 const pageStyle = {
   width: '100%',
   height: '100%',
@@ -29,27 +40,9 @@ const bodyStyle = {
   position: 'relative',
 }
 
-const FIBER_DROP_CABLE_ID = 'cabo-37'
-
-const dropFiberBtnStyle = {
-  position: 'absolute',
-  top: 16,
-  right: 16,
-  zIndex: 31,
-  padding: '10px 16px',
-  border: 'none',
-  borderRadius: 8,
-  fontSize: 13,
-  fontWeight: 600,
-  color: '#ffffff',
-  background: '#c62828',
-  boxShadow: '0 2px 8px rgba(198, 40, 40, 0.35)',
-  cursor: 'pointer',
-  pointerEvents: 'auto',
-}
-
 export function MonitoramentoPage() {
   const [testMode] = useState(() => isTestModeEnabled())
+  const [isMobileClient] = useState(() => isMobileDevice())
   const [canvasMode, setCanvasMode] = useState(INTERACTION_MODE.NAVIGATION)
   const [radioAlert, setRadioAlert] = useState(null)
 
@@ -91,24 +84,85 @@ export function MonitoramentoPage() {
     ],
   )
 
-  const handleSimulateFiberDrop = useCallback(
+  const applyFiberDrop = useCallback(
     (caboIds) => {
       fiberNetwork.simulateDrop(caboIds, {
         onReachFim: ({ radios }) => {
           radioDiagram.highlightForCascade(radios)
           setRadioAlert(formatRadioFunctioningMessage(radios))
         },
+        onAfterFiberFailure: (vermelhos) => {
+          urDiagram.syncUrFallsFromFibers(vermelhos, fiberNetwork.network.urRules)
+        },
       })
     },
-    [fiberNetwork, radioDiagram],
+    [fiberNetwork, radioDiagram, urDiagram],
   )
 
-  const handleClearFiberSimulation = useCallback(() => {
+  const applyClearFiberSimulation = useCallback(() => {
     fiberNetwork.clearSimulation()
+    urDiagram.clearUrFallsFromFiberSimulation()
     radioDiagram.clearCascadeHighlight()
     fiberDiagram.reset(fiberDiagram.fiberIds)
     setRadioAlert(null)
-  }, [fiberNetwork, radioDiagram, fiberDiagram])
+  }, [fiberNetwork, radioDiagram, fiberDiagram, urDiagram])
+
+  const applySetUrSemEnergia = useCallback(
+    (urNumber, type, ativo) => {
+      urDiagram.setUrSemEnergia(urNumber, type, ativo)
+    },
+    [urDiagram],
+  )
+
+  const applyClearUrSemEnergia = useCallback(() => {
+    urDiagram.clearAllUrSemEnergia()
+  }, [urDiagram])
+
+  const handleRemoteDemoMessage = useCallback(
+    (message) => {
+      applyDemoSyncMessage(message, {
+        onFiberDrop: applyFiberDrop,
+        onClearSimulation: applyClearFiberSimulation,
+        onUrSemEnergia: applySetUrSemEnergia,
+        onClearUrSemEnergia: applyClearUrSemEnergia,
+      })
+    },
+    [
+      applyFiberDrop,
+      applyClearFiberSimulation,
+      applySetUrSemEnergia,
+      applyClearUrSemEnergia,
+    ],
+  )
+
+  const demoSync = useDemoPeerSync({ onMessage: handleRemoteDemoMessage })
+  const { canSend: demoCanSend, send: demoSend, isGuest: isDemoGuest } = demoSync
+
+  const sendGuestDemoAction = useCallback(
+    (message) => {
+      demoSend(message)
+    },
+    [demoSend],
+  )
+
+  const handleSimulateFiberDrop = useCallback(
+    (caboIds) => {
+      if (isDemoGuest) {
+        demoSend(createFiberDropMessage(caboIds))
+        return
+      }
+      applyFiberDrop(caboIds)
+    },
+    [applyFiberDrop, isDemoGuest, demoSend],
+  )
+
+  const handleClearFiberSimulation = useCallback(() => {
+    if (isDemoGuest) {
+      demoSend(createClearSimulationMessage())
+      return
+    }
+    applyClearFiberSimulation()
+  }, [applyClearFiberSimulation, isDemoGuest, demoSend])
 
   const dismissRadioAlert = useCallback(() => {
     setRadioAlert(null)
@@ -121,6 +175,24 @@ export function MonitoramentoPage() {
     [fiberNetwork],
   )
 
+  const handleSaveUrRuleConfig = useCallback(
+    (urNumber, dados) => {
+      fiberNetwork.saveUrRuleConfig(urNumber, dados)
+    },
+    [fiberNetwork],
+  )
+
+  const urCableOptions = useMemo(
+    () =>
+      [
+        ...new Set([
+          ...fiberDiagram.fiberIds,
+          ...fiberNetwork.urCableIds,
+        ]),
+      ].sort(),
+    [fiberDiagram.fiberIds, fiberNetwork.urCableIds],
+  )
+
   const handleTestDrop = useCallback(
     (caboId) => {
       handleSimulateFiberDrop([caboId])
@@ -128,10 +200,52 @@ export function MonitoramentoPage() {
     [handleSimulateFiberDrop],
   )
 
+  const handleClearUrSemEnergia = useCallback(() => {
+    if (isDemoGuest) {
+      demoSend(createClearUrSemEnergiaMessage())
+      return
+    }
+    applyClearUrSemEnergia()
+  }, [applyClearUrSemEnergia, isDemoGuest, demoSend])
+
+  const { entries: monitoringErrors, clearLog } = useMonitoringErrorLog({
+    saveError: fiberNetwork.saveError,
+    radioAlert,
+    failureCabos: fiberNetwork.activeFailure.cabos,
+    semEnergiaPorUr: urDiagram.semEnergiaPorUr,
+  })
+
+  const handleClearAllErrors = useCallback(() => {
+    clearLog()
+    dismissRadioAlert()
+    fiberNetwork.clearSaveError()
+    handleClearFiberSimulation()
+    handleClearUrSemEnergia()
+  }, [
+    clearLog,
+    dismissRadioAlert,
+    fiberNetwork,
+    handleClearFiberSimulation,
+    handleClearUrSemEnergia,
+  ])
+
+  const showMobileControl =
+    isMobileClient && demoSync.role !== DEMO_PEER_ROLE.HOST
+
+  if (showMobileControl) {
+    return (
+      <main style={pageStyle}>
+        <DemoMobileScreen sync={demoSync} onSend={sendGuestDemoAction} />
+      </main>
+    )
+  }
+
   return (
     <main style={pageStyle}>
       <div style={bodyStyle}>
-        <RadioFunctioningAlert alert={radioAlert} onDismiss={dismissRadioAlert} />
+        <DemoPeerPanel sync={demoSync} />
+
+        <ErrorsPanel errors={monitoringErrors} onClearAll={handleClearAllErrors} />
 
         <UrConfirmPopup
           urNumber={urDiagram.urConfirm?.number}
@@ -141,15 +255,6 @@ export function MonitoramentoPage() {
           onConfirm={urDiagram.confirmUrAction}
           onCancel={urDiagram.cancelUrAction}
         />
-
-        <button
-          type="button"
-          style={dropFiberBtnStyle}
-          onClick={() => handleSimulateFiberDrop([FIBER_DROP_CABLE_ID])}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          Cair fibra
-        </button>
 
         <CanvasViewport
           mode={canvasMode}
@@ -168,6 +273,26 @@ export function MonitoramentoPage() {
         </CanvasViewport>
 
         {testMode && (
+        <UrRuleConfigPanel
+          visible={canvasMode === INTERACTION_MODE.FIBER_CONFIG}
+          urNumber={fiberNetwork.selectedUrNumber}
+          rule={
+            fiberNetwork.selectedUrNumber
+              ? getUrRuleFromNetwork(
+                  fiberNetwork.network,
+                  fiberNetwork.selectedUrNumber,
+                )
+              : null
+          }
+          cableOptions={urCableOptions}
+          networkLoading={fiberNetwork.networkLoading}
+          saveError={fiberNetwork.saveError}
+          onSave={handleSaveUrRuleConfig}
+          onClose={() => fiberNetwork.setSelectedUrNumber(null)}
+        />
+        )}
+
+        {testMode && (
         <FiberConfigPanel
           visible={canvasMode === INTERACTION_MODE.FIBER_CONFIG}
           linkId={fiberNetwork.selectedLinkId}
@@ -184,28 +309,6 @@ export function MonitoramentoPage() {
         />
         )}
 
-        {testMode && (
-        <FiberTestFab
-          setFibers={fiberDiagram.setFibers}
-          fiberIds={fiberDiagram.fiberIds}
-          cableIdLabelsVisible={fiberDiagram.cableIdLabelsVisible}
-          setCableIdLabelsVisible={fiberDiagram.setCableIdLabelsVisible}
-          setLeds={ledDiagram.setLeds}
-          ledPairs={ledDiagram.ledPairs}
-          applyVisibility={radioDiagram.applyVisibility}
-          radioLineOptions={radioDiagram.radioLineOptions}
-          torreTextoOptions={radioDiagram.torreTextoOptions}
-          torreImgOptions={radioDiagram.torreImgOptions}
-          resetRadios={radioDiagram.resetRadios}
-          network={fiberNetwork.network}
-          onSimulateFiberDrop={handleSimulateFiberDrop}
-          onClearFiberSimulation={handleClearFiberSimulation}
-          onExportNetwork={fiberNetwork.exportNetwork}
-          onImportNetwork={fiberNetwork.importNetwork}
-          getAfetadosPreview={(caboId) => fiberNetwork.getAfetados(caboId)}
-          onLoadExampleNetwork={fiberNetwork.loadExample}
-        />
-        )}
       </div>
     </main>
   )

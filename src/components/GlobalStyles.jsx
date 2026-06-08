@@ -1,3 +1,5 @@
+import { FIBER_FALLEN_COLOR } from '../fibers/fibers'
+import { UR_ENERGY_ICON_COLOR } from '../urs/urEnergyIcon'
 import { LED_NOT_OK_FILL, LED_NOT_OK_FILL_BRIGHT } from '../leds/leds'
 import { RADIO_OK_COLOR } from '../radios/radios'
 import { colors } from '../styles/tokens'
@@ -43,6 +45,22 @@ const globalCss = `
     stroke: #e53935 !important;
     stroke-width: 4px !important;
     animation: monitoramento-fibra-piscar 1s ease-in-out infinite;
+  }
+
+  .fibra-caida.fibra-queda-real {
+    stroke: ${FIBER_FALLEN_COLOR} !important;
+    stroke-width: 5px !important;
+  }
+
+  .ur-icon-energia {
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .ur-icon-energia text {
+    fill: ${UR_ENERGY_ICON_COLOR};
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    font-weight: 700;
   }
 
   .equipamento-sem-comunicacao {

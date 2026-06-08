@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import { FIBER_STATUS } from '../fibers/fibers'
 import { LED_SIDES, LED_STATUS } from '../leds/leds'
+import { UrEnergyIconBadge } from '../urs/UrEnergyIconBadge'
+import { UR_ENERGY_TYPE } from '../urs/urEnergyIcon.constants'
+import { UR_NUMBERS } from '../urs/urs'
 import { colors } from '../styles/tokens'
 
 const fabStyle = {
@@ -274,8 +277,13 @@ function TestModal({
   onImportNetwork,
   getAfetadosPreview,
   onLoadExampleNetwork,
+  semEnergiaPorUr = {},
+  onSetUrSemEnergia,
+  onClearUrSemEnergia,
 }) {
   const [tab, setTab] = useState('fibra')
+  const [selectedUr, setSelectedUr] = useState(2)
+  const [urSearch, setUrSearch] = useState('')
   const [selectedFibers, setSelectedFibers] = useState(() => new Set())
   const [afetadosPreview, setAfetadosPreview] = useState(null)
   const [ledSideStates, setLedSideStates] = useState(() => new Map())
@@ -290,6 +298,17 @@ function TestModal({
     return fiberIds.filter((id) => id.toLowerCase().includes(term))
   }, [fiberIds, fiberSearch])
 
+  const filteredUrNumbers = useMemo(() => {
+    const term = urSearch.trim()
+    if (!term) return UR_NUMBERS
+    return UR_NUMBERS.filter((n) => String(n).includes(term))
+  }, [urSearch])
+
+  const selectedUrTipos = semEnergiaPorUr[selectedUr] ?? []
+  const selectedUrFalta1 = selectedUrTipos.includes(UR_ENERGY_TYPE.FALTA_1)
+  const selectedUrFalta2 = selectedUrTipos.includes(UR_ENERGY_TYPE.FALTA_2)
+  const totalSemEnergia = Object.keys(semEnergiaPorUr).length
+
   if (!open) return null
 
   function close() {
@@ -299,6 +318,8 @@ function TestModal({
     setSelectedTextos(new Set())
     setSelectedImgs(new Set())
     setFiberSearch('')
+    setUrSearch('')
+    setSelectedUr(2)
     setTab('fibra')
     onClose()
   }
@@ -368,6 +389,8 @@ function TestModal({
       cabos: [...cabos],
       nodes: [...nodes],
       ordem: results.flatMap((r) => r.ordem ?? r.cabos),
+      ordemVolta: results.flatMap((r) => r.ordemVolta ?? []),
+      raiz: results[0]?.raiz ?? null,
     })
   }
 
@@ -481,6 +504,13 @@ function TestModal({
           >
             LEDs
           </button>
+          <button
+            type="button"
+            style={tabStyle(tab === 'ur')}
+            onClick={() => setTab('ur')}
+          >
+            UR
+          </button>
         </div>
 
         {tab === 'fibra' && (
@@ -542,8 +572,8 @@ function TestModal({
             </div>
 
             <p style={hintStyle}>
-              Cascata vermelha até o cabo com <strong>Fim?</strong> — aí os rádios
-              ficam evidentes — depois volta em verde. Só o cabo que caiu fica vermelho.
+              Na volta, cabos que já estavam caídos estendem o vermelho da origem até
+              eles; o restante do caminho fica verde. Rádios no fim ficam evidentes.
             </p>
 
             <div style={rowActionsStyle}>
@@ -561,9 +591,13 @@ function TestModal({
                 {afetadosPreview.ordemVolta?.length > 0 && (
                   <>
                     <br />
-                    Volta (verde): {afetadosPreview.ordemVolta.join(' → ')}
+                    Volta: {afetadosPreview.ordemVolta.join(' → ')}
+                  </>
+                )}
+                {afetadosPreview.raiz && (
+                  <>
                     <br />
-                    Fica vermelho: {afetadosPreview.raiz || '—'}
+                    Fica vermelho: {afetadosPreview.raiz}
                   </>
                 )}
               </p>
@@ -654,6 +688,104 @@ function TestModal({
           </>
         )}
 
+        {tab === 'ur' && (
+          <>
+            <p style={hintStyle}>
+              Selecione a UR. <strong>Falta energia 1</strong> (esquerda) e{' '}
+              <strong>Falta energia 2</strong> (direita) podem aparecer juntas.
+            </p>
+
+            <input
+              type="search"
+              placeholder="Buscar UR (ex: 12)"
+              value={urSearch}
+              onChange={(e) => setUrSearch(e.target.value)}
+              style={searchStyle}
+            />
+
+            <div style={listStyle}>
+              {filteredUrNumbers.map((numero) => {
+                const selected = selectedUr === numero
+                const tipos = semEnergiaPorUr[numero] ?? []
+                return (
+                  <label
+                    key={numero}
+                    style={{
+                      ...checkboxLabelStyle,
+                      padding: '6px 8px',
+                      borderRadius: 8,
+                      background: selected ? colors.bg : 'transparent',
+                      border: selected
+                        ? `1px solid ${colors.border}`
+                        : '1px solid transparent',
+                    }}
+                    onClick={() => setSelectedUr(numero)}
+                  >
+                    <input
+                      type="radio"
+                      name="ur-teste"
+                      checked={selected}
+                      onChange={() => setSelectedUr(numero)}
+                    />
+                    UR {numero}
+                    {tipos.length > 0 && (
+                      <span
+                        style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}
+                      >
+                        {tipos.includes(UR_ENERGY_TYPE.FALTA_1) && (
+                          <UrEnergyIconBadge size={20} />
+                        )}
+                        {tipos.includes(UR_ENERGY_TYPE.FALTA_2) && (
+                          <UrEnergyIconBadge size={20} />
+                        )}
+                      </span>
+                    )}
+                  </label>
+                )
+              })}
+            </div>
+
+            <label style={checkboxLabelStyle}>
+              <input
+                type="checkbox"
+                checked={selectedUrFalta1}
+                onChange={(e) =>
+                  onSetUrSemEnergia?.(
+                    selectedUr,
+                    UR_ENERGY_TYPE.FALTA_1,
+                    e.target.checked,
+                  )
+                }
+              />
+              Falta energia 1 (esquerda) — UR {selectedUr}
+            </label>
+
+            <label style={{ ...checkboxLabelStyle, marginBottom: 12 }}>
+              <input
+                type="checkbox"
+                checked={selectedUrFalta2}
+                onChange={(e) =>
+                  onSetUrSemEnergia?.(
+                    selectedUr,
+                    UR_ENERGY_TYPE.FALTA_2,
+                    e.target.checked,
+                  )
+                }
+              />
+              Falta energia 2 (direita) — UR {selectedUr}
+            </label>
+
+            <button
+              type="button"
+              style={secondaryBtnStyle}
+              onClick={() => onClearUrSemEnergia?.()}
+              disabled={totalSemEnergia === 0}
+            >
+              Ligar energia em todas
+            </button>
+          </>
+        )}
+
         {tab === 'radio' && (
           <>
             <p style={hintStyle}>
@@ -726,6 +858,9 @@ export function FiberTestFab({
   onImportNetwork,
   getAfetadosPreview,
   onLoadExampleNetwork,
+  semEnergiaPorUr,
+  onSetUrSemEnergia,
+  onClearUrSemEnergia,
 }) {
   const [open, setOpen] = useState(false)
 
@@ -761,6 +896,9 @@ export function FiberTestFab({
         onImportNetwork={onImportNetwork}
         getAfetadosPreview={getAfetadosPreview}
         onLoadExampleNetwork={onLoadExampleNetwork}
+        semEnergiaPorUr={semEnergiaPorUr}
+        onSetUrSemEnergia={onSetUrSemEnergia}
+        onClearUrSemEnergia={onClearUrSemEnergia}
       />
     </>
   )

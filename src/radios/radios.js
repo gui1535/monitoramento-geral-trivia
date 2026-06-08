@@ -182,6 +182,7 @@ function applyRadioGreenVisual(element, elementId, evident) {
         element.dataset.radioStrokeDefault = element.getAttribute('stroke') ?? 'black'
       }
 
+      setElementOpacity(element, RADIO_ACTIVE_OPACITY)
       element.setAttribute('stroke', RADIO_OK_COLOR)
       element.style.setProperty('stroke', RADIO_OK_COLOR, 'important')
     } else {
@@ -221,16 +222,16 @@ export function highlightRadios(svgRoot, radios) {
 
   const merged = {
     lines: [...new Set([...selection.lines, ...linhasJaAtivas])],
-    textos: [...new Set([...selection.textos])],
-    imgs: [...new Set([...selection.imgs])],
+    textos: [...new Set([...selection.textos, ...evidentesAnteriores.filter((id) => id.startsWith('texto-torre-'))])],
+    imgs: [...new Set([...selection.imgs, ...evidentesAnteriores.filter((id) => id.startsWith('img-torre-'))])],
   }
 
   applyRadioVisibility(svgRoot, merged)
 
   const evidentIds = new Set([
-    ...selection.lines,
-    ...selection.textos,
-    ...selection.imgs,
+    ...merged.lines,
+    ...merged.textos,
+    ...merged.imgs,
     ...evidentesAnteriores,
   ])
 

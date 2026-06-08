@@ -7,6 +7,12 @@ import {
   getChaveGroup,
   toggleChaveUpright,
 } from './chaves'
+import {
+  serializeSemEnergiaPorUr,
+  syncUrEnergyIcons,
+} from './urEnergyIcon'
+import { UR_ENERGY_TYPE } from './urEnergyIcon.constants'
+import { evaluateUrFallsFromRedFibers } from './urRules'
 
 export const UR_NUMBERS = Array.from({ length: 39 }, (_, index) => index + 1)
 
@@ -227,8 +233,26 @@ export function useUrDiagram(interactionMode) {
   const onChaveClickRef = useRef(null)
   const activeUrsRef = useRef(new Set())
   const uprightChavesRef = useRef(new Set())
+  const semEnergiaPorUrRef = useRef(new Map())
+  const ursCaidasPorFibraRef = useRef(new Set())
   const connectingTimeoutsRef = useRef(new Map())
   const [urConfirm, setUrConfirm] = useState(null)
+  const [semEnergiaPorUr, setSemEnergiaPorUr] = useState({})
+
+  const publishSemEnergia = useCallback(() => {
+    setSemEnergiaPorUr(serializeSemEnergiaPorUr(semEnergiaPorUrRef.current))
+  }, [])
+
+  const syncEnergyIcons = useCallback(() => {
+    if (!svgRef.current) return
+    syncUrEnergyIcons(svgRef.current, {
+      semEnergiaPorUr: semEnergiaPorUrRef.current,
+    })
+  }, [])
+
+  useEffect(() => {
+    syncEnergyIcons()
+  }, [syncEnergyIcons, semEnergiaPorUr])
 
   const registerSvg = useCallback((svgElement) => {
     svgRef.current = svgElement
@@ -260,6 +284,10 @@ export function useUrDiagram(interactionMode) {
       } else {
         uprightChavesRef.current.delete(number)
       }
+    })
+
+    syncUrEnergyIcons(svgElement, {
+      semEnergiaPorUr: semEnergiaPorUrRef.current,
     })
   }, [])
 
@@ -358,6 +386,72 @@ export function useUrDiagram(interactionMode) {
     setUrConfirm(null)
   }, [])
 
+  const setUrSemEnergia = useCallback(
+    (urNumber, type, ativo = true) => {
+      const tipos = new Set(semEnergiaPorUrRef.current.get(urNumber) ?? [])
+
+      if (ativo) {
+        tipos.add(type)
+      } else {
+        tipos.delete(type)
+      }
+
+      if (tipos.size > 0) {
+        semEnergiaPorUrRef.current.set(urNumber, tipos)
+      } else {
+        semEnergiaPorUrRef.current.delete(urNumber)
+      }
+
+      publishSemEnergia()
+    },
+    [publishSemEnergia],
+  )
+
+  const clearAllUrSemEnergia = useCallback(() => {
+    semEnergiaPorUrRef.current.clear()
+    publishSemEnergia()
+  }, [publishSemEnergia])
+
+  const syncUrFallsFromFibers = useCallback(
+    (vermelhos, urRules = []) => {
+      if (!svgRef.current) return
+
+      const vermelhoSet = new Set(vermelhos)
+      const devemCair = new Set(evaluateUrFallsFromRedFibers(vermelhoSet, urRules))
+
+      ursCaidasPorFibraRef.current.forEach((urNumber) => {
+        if (devemCair.has(urNumber)) return
+
+        applyUrActive(svgRef.current, urNumber, true)
+        activeUrsRef.current.add(urNumber)
+        setUrSemEnergia(urNumber, UR_ENERGY_TYPE.FALTA_1, false)
+        ursCaidasPorFibraRef.current.delete(urNumber)
+      })
+
+      devemCair.forEach((urNumber) => {
+        if (ursCaidasPorFibraRef.current.has(urNumber)) return
+
+        applyUrStatus(svgRef.current, urNumber, UR_STATUS.INACTIVE)
+        activeUrsRef.current.delete(urNumber)
+        setUrSemEnergia(urNumber, UR_ENERGY_TYPE.FALTA_1, true)
+        ursCaidasPorFibraRef.current.add(urNumber)
+      })
+    },
+    [setUrSemEnergia],
+  )
+
+  const clearUrFallsFromFiberSimulation = useCallback(() => {
+    if (!svgRef.current) return
+
+    ursCaidasPorFibraRef.current.forEach((urNumber) => {
+      applyUrActive(svgRef.current, urNumber, true)
+      activeUrsRef.current.add(urNumber)
+      setUrSemEnergia(urNumber, UR_ENERGY_TYPE.FALTA_1, false)
+    })
+
+    ursCaidasPorFibraRef.current.clear()
+  }, [setUrSemEnergia])
+
   return {
     registerSvg,
     setOnUrClick,
@@ -372,5 +466,10 @@ export function useUrDiagram(interactionMode) {
       toggleChaveUpright(svgRef.current, number),
     getActiveUrs: () => [...activeUrsRef.current],
     getUprightChaves: () => [...uprightChavesRef.current],
+    semEnergiaPorUr,
+    setUrSemEnergia,
+    clearAllUrSemEnergia,
+    syncUrFallsFromFibers,
+    clearUrFallsFromFiberSimulation,
   }
 }

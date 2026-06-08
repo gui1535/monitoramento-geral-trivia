@@ -7,6 +7,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -23,6 +25,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -39,6 +43,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -55,6 +61,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -71,6 +79,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -87,6 +97,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-7"
+      ],
+      "volta": [
+        "cabo-74"
+      ],
       "derruba": [
         "cabo-7"
       ],
@@ -105,6 +121,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-8"
+      ],
+      "volta": [
+        "cabo-6"
+      ],
       "derruba": [
         "cabo-8"
       ],
@@ -123,6 +145,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-9"
+      ],
+      "volta": [
+        "cabo-7"
+      ],
       "derruba": [
         "cabo-9"
       ],
@@ -141,6 +169,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-10"
+      ],
+      "volta": [
+        "cabo-8"
+      ],
       "derruba": [
         "cabo-10"
       ],
@@ -159,6 +193,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-11"
+      ],
+      "volta": [
+        "cabo-9"
+      ],
       "derruba": [
         "cabo-11"
       ],
@@ -177,6 +217,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-12"
+      ],
+      "volta": [
+        "cabo-10"
+      ],
       "derruba": [
         "cabo-12"
       ],
@@ -195,6 +241,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-13"
+      ],
+      "volta": [
+        "cabo-11"
+      ],
       "derruba": [
         "cabo-13"
       ],
@@ -213,6 +265,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-14"
+      ],
+      "volta": [
+        "cabo-12"
+      ],
       "derruba": [
         "cabo-14"
       ],
@@ -231,6 +289,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-15"
+      ],
+      "volta": [
+        "cabo-13"
+      ],
       "derruba": [
         "cabo-15"
       ],
@@ -249,6 +313,13 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-81",
+        "cabo-68"
+      ],
+      "volta": [
+        "cabo-14"
+      ],
       "derruba": [
         "cabo-81",
         "cabo-68"
@@ -268,6 +339,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -284,6 +357,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -300,6 +375,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-19"
+      ],
+      "volta": [
+        "cabo-81"
+      ],
       "derruba": [
         "cabo-19"
       ],
@@ -318,6 +399,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-20"
+      ],
+      "volta": [
+        "cabo-18"
+      ],
       "derruba": [
         "cabo-20"
       ],
@@ -336,6 +423,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-21"
+      ],
+      "volta": [
+        "cabo-19"
+      ],
       "derruba": [
         "cabo-21"
       ],
@@ -354,6 +447,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-22"
+      ],
+      "volta": [
+        "cabo-20"
+      ],
       "derruba": [
         "cabo-22"
       ],
@@ -372,6 +471,13 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-82",
+        "cabo-23"
+      ],
+      "volta": [
+        "cabo-21"
+      ],
       "derruba": [
         "cabo-82",
         "cabo-23"
@@ -391,6 +497,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-22"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -407,6 +517,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-40"
+      ],
+      "volta": [
+        "cabo-80"
+      ],
       "derruba": [
         "cabo-40"
       ],
@@ -425,6 +541,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -441,6 +559,15 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-70",
+        "cabo-79",
+        "cabo-80",
+        "cabo-24"
+      ],
+      "volta": [
+        "cabo-27"
+      ],
       "derruba": [
         "cabo-70",
         "cabo-79",
@@ -462,6 +589,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-26"
+      ],
+      "volta": [
+        "cabo-78"
+      ],
       "derruba": [
         "cabo-26"
       ],
@@ -480,6 +613,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-31"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -496,6 +633,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-31"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -512,6 +653,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-31"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -528,6 +673,16 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-77",
+        "cabo-30",
+        "cabo-29",
+        "cabo-28",
+        "cabo-78"
+      ],
+      "volta": [
+        "cabo-32"
+      ],
       "derruba": [
         "cabo-77",
         "cabo-30",
@@ -550,6 +705,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-31"
+      ],
+      "volta": [
+        "cabo-33"
+      ],
       "derruba": [
         "cabo-31"
       ],
@@ -568,6 +729,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-32"
+      ],
+      "volta": [
+        "cabo-76"
+      ],
       "derruba": [
         "cabo-32"
       ],
@@ -586,6 +753,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -602,6 +771,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -618,6 +789,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -634,6 +807,13 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-75",
+        "cabo-36",
+        "cabo-35",
+        "cabo-76"
+      ],
+      "volta": [],
       "derruba": [
         "cabo-75",
         "cabo-36",
@@ -655,6 +835,11 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-37",
+        "cabo-74"
+      ],
+      "volta": [],
       "derruba": [
         "cabo-37",
         "cabo-74"
@@ -674,6 +859,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -690,6 +877,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-41"
+      ],
+      "volta": [
+        "cabo-24"
+      ],
       "derruba": [
         "cabo-41"
       ],
@@ -708,6 +901,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-42"
+      ],
+      "volta": [
+        "cabo-40"
+      ],
       "derruba": [
         "cabo-42"
       ],
@@ -726,6 +925,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-43"
+      ],
+      "volta": [
+        "cabo-41"
+      ],
       "derruba": [
         "cabo-43"
       ],
@@ -744,6 +949,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-44"
+      ],
+      "volta": [
+        "cabo-42"
+      ],
       "derruba": [
         "cabo-44"
       ],
@@ -762,6 +973,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-45"
+      ],
+      "volta": [
+        "cabo-43"
+      ],
       "derruba": [
         "cabo-45"
       ],
@@ -780,6 +997,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-46"
+      ],
+      "volta": [
+        "cabo-44"
+      ],
       "derruba": [
         "cabo-46"
       ],
@@ -798,6 +1021,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-47"
+      ],
+      "volta": [
+        "cabo-45"
+      ],
       "derruba": [
         "cabo-47"
       ],
@@ -816,6 +1045,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-48"
+      ],
+      "volta": [
+        "cabo-46"
+      ],
       "derruba": [
         "cabo-48"
       ],
@@ -834,6 +1069,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-47"
+      ],
       "derruba": [],
       "fim": true,
       "radios": {
@@ -866,6 +1105,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-50"
+      ],
+      "volta": [],
       "derruba": [
         "cabo-50"
       ],
@@ -884,6 +1127,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-51"
+      ],
+      "volta": [
+        "cabo-49"
+      ],
       "derruba": [
         "cabo-51"
       ],
@@ -902,6 +1151,13 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-52",
+        "cabo-73"
+      ],
+      "volta": [
+        "cabo-50"
+      ],
       "derruba": [
         "cabo-52",
         "cabo-73"
@@ -921,6 +1177,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-53"
+      ],
+      "volta": [
+        "cabo-51"
+      ],
       "derruba": [
         "cabo-53"
       ],
@@ -939,6 +1201,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-54"
+      ],
+      "volta": [
+        "cabo-52"
+      ],
       "derruba": [
         "cabo-54"
       ],
@@ -957,6 +1225,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-55"
+      ],
+      "volta": [
+        "cabo-53"
+      ],
       "derruba": [
         "cabo-55"
       ],
@@ -975,6 +1249,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-56"
+      ],
+      "volta": [
+        "cabo-54"
+      ],
       "derruba": [
         "cabo-56"
       ],
@@ -993,6 +1273,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-57"
+      ],
+      "volta": [
+        "cabo-55"
+      ],
       "derruba": [
         "cabo-57"
       ],
@@ -1011,6 +1297,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-58"
+      ],
+      "volta": [
+        "cabo-56"
+      ],
       "derruba": [
         "cabo-58"
       ],
@@ -1029,6 +1321,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-59"
+      ],
+      "volta": [
+        "cabo-57"
+      ],
       "derruba": [
         "cabo-59"
       ],
@@ -1047,6 +1345,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-60"
+      ],
+      "volta": [
+        "cabo-58"
+      ],
       "derruba": [
         "cabo-60"
       ],
@@ -1065,6 +1369,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-61"
+      ],
+      "volta": [
+        "cabo-59"
+      ],
       "derruba": [
         "cabo-61"
       ],
@@ -1083,6 +1393,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-62"
+      ],
+      "volta": [
+        "cabo-60"
+      ],
       "derruba": [
         "cabo-62"
       ],
@@ -1101,6 +1417,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-63"
+      ],
+      "volta": [
+        "cabo-61"
+      ],
       "derruba": [
         "cabo-63"
       ],
@@ -1119,6 +1441,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-64"
+      ],
+      "volta": [
+        "cabo-62"
+      ],
       "derruba": [
         "cabo-64"
       ],
@@ -1137,6 +1465,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-65"
+      ],
+      "volta": [
+        "cabo-63"
+      ],
       "derruba": [
         "cabo-65"
       ],
@@ -1155,6 +1489,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-66"
+      ],
+      "volta": [
+        "cabo-64"
+      ],
       "derruba": [
         "cabo-66"
       ],
@@ -1173,6 +1513,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-65"
+      ],
       "derruba": [],
       "fim": true,
       "radios": {
@@ -1205,6 +1549,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1221,6 +1567,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-15"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1237,6 +1587,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1253,6 +1605,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-26"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1269,6 +1625,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1285,6 +1643,8 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1301,6 +1661,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-51"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1317,6 +1681,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-6"
+      ],
+      "volta": [
+        "cabo-38"
+      ],
       "derruba": [
         "cabo-6"
       ],
@@ -1335,6 +1705,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-37"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1351,6 +1725,15 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-33"
+      ],
+      "volta": [
+        "cabo-35",
+        "cabo-36",
+        "cabo-37",
+        "cabo-75"
+      ],
       "derruba": [
         "cabo-33"
       ],
@@ -1369,6 +1752,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-31"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1385,6 +1772,15 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-27"
+      ],
+      "volta": [
+        "cabo-30",
+        "cabo-29",
+        "cabo-77",
+        "cabo-28"
+      ],
       "derruba": [
         "cabo-27"
       ],
@@ -1403,6 +1799,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-26"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1419,6 +1819,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-26",
+        "cabo-70",
+        "cabo-79"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1435,6 +1841,12 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [
+        "cabo-18"
+      ],
+      "volta": [
+        "cabo-15"
+      ],
       "derruba": [
         "cabo-18"
       ],
@@ -1453,6 +1865,10 @@
       "from": "",
       "to": "",
       "principal": false,
+      "ida": [],
+      "volta": [
+        "cabo-22"
+      ],
       "derruba": [],
       "fim": false,
       "radios": {
@@ -1462,6 +1878,338 @@
       },
       "equipamentosAfetados": [],
       "observacao": ""
+    }
+  ],
+  "urRules": [
+    {
+      "ur": 1,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-1"
+      ]
+    },
+    {
+      "ur": 2,
+      "habilitado": true,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-1",
+        "cabo-ur-2",
+        "cabo-54",
+        "cabo-55"
+      ]
+    },
+    {
+      "ur": 3,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-2",
+        "cabo-ur-3"
+      ]
+    },
+    {
+      "ur": 4,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-3",
+        "cabo-ur-4"
+      ]
+    },
+    {
+      "ur": 5,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-4",
+        "cabo-ur-5"
+      ]
+    },
+    {
+      "ur": 6,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-5",
+        "cabo-ur-6"
+      ]
+    },
+    {
+      "ur": 7,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-6",
+        "cabo-ur-7"
+      ]
+    },
+    {
+      "ur": 8,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-7",
+        "cabo-ur-8"
+      ]
+    },
+    {
+      "ur": 9,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-8",
+        "cabo-ur-9"
+      ]
+    },
+    {
+      "ur": 10,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-9",
+        "cabo-ur-10"
+      ]
+    },
+    {
+      "ur": 11,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-10",
+        "cabo-ur-11"
+      ]
+    },
+    {
+      "ur": 12,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-11",
+        "cabo-ur-12"
+      ]
+    },
+    {
+      "ur": 13,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-12",
+        "cabo-ur-13"
+      ]
+    },
+    {
+      "ur": 14,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-13",
+        "cabo-ur-14"
+      ]
+    },
+    {
+      "ur": 15,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-14",
+        "cabo-ur-15"
+      ]
+    },
+    {
+      "ur": 16,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-15",
+        "cabo-ur-16"
+      ]
+    },
+    {
+      "ur": 17,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-16",
+        "cabo-ur-17"
+      ]
+    },
+    {
+      "ur": 18,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-17",
+        "cabo-ur-18"
+      ]
+    },
+    {
+      "ur": 19,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-18",
+        "cabo-ur-19"
+      ]
+    },
+    {
+      "ur": 20,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-19",
+        "cabo-ur-20"
+      ]
+    },
+    {
+      "ur": 21,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-20",
+        "cabo-ur-21"
+      ]
+    },
+    {
+      "ur": 22,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-21",
+        "cabo-ur-22"
+      ]
+    },
+    {
+      "ur": 23,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-22",
+        "cabo-ur-23"
+      ]
+    },
+    {
+      "ur": 24,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-23",
+        "cabo-ur-24"
+      ]
+    },
+    {
+      "ur": 25,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-24",
+        "cabo-ur-25"
+      ]
+    },
+    {
+      "ur": 26,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-25",
+        "cabo-ur-26"
+      ]
+    },
+    {
+      "ur": 27,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-26",
+        "cabo-ur-27"
+      ]
+    },
+    {
+      "ur": 28,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-27",
+        "cabo-ur-28"
+      ]
+    },
+    {
+      "ur": 29,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-28",
+        "cabo-ur-29"
+      ]
+    },
+    {
+      "ur": 30,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-29",
+        "cabo-ur-30"
+      ]
+    },
+    {
+      "ur": 31,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-30",
+        "cabo-ur-31"
+      ]
+    },
+    {
+      "ur": 32,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": [
+        "cabo-ur-31"
+      ]
+    },
+    {
+      "ur": 33,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 34,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 35,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 36,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 37,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 38,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
+    },
+    {
+      "ur": 39,
+      "habilitado": false,
+      "minCabosVermelhos": 2,
+      "cabos": []
     }
   ]
 }

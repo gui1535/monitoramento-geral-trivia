@@ -4,14 +4,19 @@ import { hideElementIdLabels, showElementIdLabels } from '../canvas/idLabels'
 export const FIBER_STATUS = {
   NORMAL: 'normal',
   ALERT: 'alert',
+  FALLEN: 'fallen',
   OFFLINE: 'offline',
   ACTIVE: 'active',
   CUSTOM: 'custom',
 }
 
+/** Mesmo vermelho do alerta, um tom mais forte (Material Red 700). */
+export const FIBER_FALLEN_COLOR = '#bf1515'
+
 export const FIBER_STATUS_COLORS = {
   [FIBER_STATUS.NORMAL]: '#FF751F',
   [FIBER_STATUS.ALERT]: '#e53935',
+  [FIBER_STATUS.FALLEN]: FIBER_FALLEN_COLOR,
   [FIBER_STATUS.OFFLINE]: '#9ca3af',
   [FIBER_STATUS.ACTIVE]: '#009819',
 }

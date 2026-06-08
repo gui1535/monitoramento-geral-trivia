@@ -38,7 +38,7 @@ const inputStyle = {
 }
 
 const listStyle = {
-  maxHeight: 280,
+  maxHeight: 200,
   overflowY: 'auto',
   marginBottom: 12,
   paddingRight: 4,
@@ -111,23 +111,102 @@ const radiosListStyle = {
   marginBottom: 8,
 }
 
+function caboSortKey(id) {
+  const n = Number(String(id).replace('cabo-', ''))
+  return Number.isFinite(n) ? n : 0
+}
+
+/** Selecionados primeiro; dentro de cada grupo, ordem numérica do cabo. */
+function sortWithSelectedFirst(ids, selected) {
+  const selectedSet = new Set(selected)
+  return [...ids].sort((a, b) => {
+    const aSel = selectedSet.has(a)
+    const bSel = selectedSet.has(b)
+    if (aSel !== bSel) return aSel ? -1 : 1
+    return caboSortKey(a) - caboSortKey(b)
+  })
+}
+
 function RadioCheckboxGroup({ title, options, selected, onToggle }) {
   return (
     <div style={{ marginBottom: 10 }}>
       <p style={{ ...sectionTitleStyle, marginBottom: 6 }}>{title}</p>
       <div style={radiosListStyle}>
-        {options.map(({ id, label }) => (
+        {sortWithSelectedFirst(
+          options.map((o) => o.id),
+          selected,
+        ).map((id) => {
+          const option = options.find((o) => o.id === id)
+          if (!option) return null
+          return (
           <label key={id} style={checkboxLabelStyle}>
             <input
               type="checkbox"
               checked={selected.includes(id)}
               onChange={() => onToggle(id)}
             />
-            {label ?? id}
+            {option.label ?? id}
+          </label>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function FiberCheckboxList({
+  title,
+  hint,
+  fiberIds,
+  selected,
+  onToggle,
+  search,
+  onSearchChange,
+}) {
+  const filteredFiberIds = useMemo(() => {
+    const term = search.trim().toLowerCase()
+    const filtered = term
+      ? fiberIds.filter((id) => {
+          const number = id.replace('cabo-', '')
+          return id.toLowerCase().includes(term) || number.includes(term)
+        })
+      : fiberIds
+
+    return sortWithSelectedFirst(filtered, selected)
+  }, [fiberIds, search, selected])
+
+  return (
+    <section style={{ marginBottom: 16 }}>
+      <p style={sectionTitleStyle}>{title}</p>
+      {hint && <p style={{ ...hintStyle, marginTop: 0 }}>{hint}</p>}
+
+      <input
+        type="search"
+        style={inputStyle}
+        placeholder="Buscar número (ex: 38, 7, 61)"
+        value={search}
+        onChange={(e) => onSearchChange(e.target.value)}
+      />
+
+      <div style={listStyle}>
+        {filteredFiberIds.length === 0 && (
+          <p style={hintStyle}>
+            Nenhum cabo encontrado{search ? ` para "${search}"` : ''}.
+          </p>
+        )}
+
+        {filteredFiberIds.map((id) => (
+          <label key={id} style={checkboxLabelStyle}>
+            <input
+              type="checkbox"
+              checked={selected.includes(id)}
+              onChange={() => onToggle(id)}
+            />
+            {id}
           </label>
         ))}
       </div>
-    </div>
+    </section>
   )
 }
 
@@ -146,32 +225,27 @@ export function FiberConfigPanel({
   torreImgOptions = [],
 }) {
   const link = useMemo(
-    () => network.links.find((item) => item.id === linkId) ?? null,
+    () => network.links.find((item) => item?.id === linkId) ?? null,
     [network.links, linkId],
   )
 
-  const [derruba, setDerruba] = useState([])
+  const [ida, setIda] = useState([])
+  const [volta, setVolta] = useState([])
   const [fim, setFim] = useState(false)
   const [radios, setRadios] = useState(() => createEmptyRadios())
-  const [search, setSearch] = useState('')
+  const [searchIda, setSearchIda] = useState('')
+  const [searchVolta, setSearchVolta] = useState('')
 
   const otherFiberIds = useMemo(
     () => fiberIds.filter((id) => id !== linkId),
     [fiberIds, linkId],
   )
 
-  const filteredFiberIds = useMemo(() => {
-    const term = search.trim().toLowerCase()
-    if (!term) return otherFiberIds
-
-    return otherFiberIds.filter((id) => {
-      const number = id.replace('cabo-', '')
-      return id.toLowerCase().includes(term) || number.includes(term)
-    })
-  }, [otherFiberIds, search])
-
   useEffect(() => {
-    setDerruba(link?.derruba ? [...link.derruba] : [])
+    const idaList =
+      link?.ida?.length > 0 ? link.ida : link?.derruba ? [...link.derruba] : []
+    setIda([...idaList])
+    setVolta(link?.volta ? [...link.volta] : [])
     setFim(Boolean(link?.fim))
     setRadios(
       link?.radios
@@ -182,7 +256,8 @@ export function FiberConfigPanel({
           }
         : createEmptyRadios(),
     )
-    setSearch('')
+    setSearchIda('')
+    setSearchVolta('')
   }, [link, linkId])
 
   if (!visible) return null
@@ -196,8 +271,8 @@ export function FiberConfigPanel({
     )
   }
 
-  function toggleDerruba(id) {
-    setDerruba((prev) => {
+  function toggleList(setter, id) {
+    setter((prev) => {
       const list = new Set(prev)
       if (list.has(id)) list.delete(id)
       else list.add(id)
@@ -216,7 +291,7 @@ export function FiberConfigPanel({
 
   function handleSave() {
     if (!linkId) return
-    onSave(linkId, { derruba, fim, radios })
+    onSave(linkId, { ida, volta, fim, radios })
   }
 
   if (!linkId) {
@@ -224,8 +299,9 @@ export function FiberConfigPanel({
       <aside style={panelStyle} onPointerDown={(e) => e.stopPropagation()}>
         <h2 style={titleStyle}>Configurar fibra</h2>
         <p style={hintStyle}>
-          Clique em um cabo no diagrama. Marque <strong>Fim?</strong> no cabo onde a
-          cascata deve parar e voltar em verde.
+          Clique em um <strong>cabo</strong> para ida/volta, ou em um botão{' '}
+          <strong>UR</strong> (painel à esquerda) para regra de queda por fibras
+          vermelhas.
         </p>
       </aside>
     )
@@ -240,13 +316,12 @@ export function FiberConfigPanel({
       <span style={caboBadgeStyle}>{linkId}</span>
 
       <p style={hintStyle}>
-        Cabo <strong>#{caboNumber}</strong> — cascata vermelha até o <strong>Fim?</strong>,
-        depois volta em verde (reversa) e só este cabo origem fica vermelho.
+        Cabo <strong>#{caboNumber}</strong> — marque os cabos da <strong>ida</strong>{' '}
+        (cascata até o fim) e da <strong>volta</strong> (retorno). Na volta, se algum
+        cabo anterior já estiver caído, da origem até ele ficam vermelhos.
         <br />
-        {derruba.length} derruba · {FIBER_CONFIG_FILE_PATH}
+        {ida.length} ida · {volta.length} volta · {FIBER_CONFIG_FILE_PATH}
       </p>
-
-      {saveError && <p style={{ ...hintStyle, color: '#c62828' }}>{saveError}</p>}
 
       <div style={fimBoxStyle}>
         <label style={{ ...checkboxLabelStyle, marginBottom: 0 }}>
@@ -255,7 +330,8 @@ export function FiberConfigPanel({
             checked={fim}
             onChange={(e) => setFim(e.target.checked)}
           />
-          <strong>Fim?</strong> — ponto final desta ramificação (pode haver vários; a cascata para no primeiro encontrado)
+          <strong>Fim?</strong> — ponto final desta ramificação (a cascata para no
+          primeiro encontrado)
         </label>
       </div>
 
@@ -286,32 +362,25 @@ export function FiberConfigPanel({
         </>
       )}
 
-      <p style={sectionTitleStyle}>Quando cair, Derruba (Manual)</p>
-
-      <input
-        type="search"
-        style={inputStyle}
-        placeholder="Buscar número (ex: 38, 7, 61)"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+      <FiberCheckboxList
+        title="Ida"
+        hint="Próximos cabos quando a cascata passa por este cabo (sentido até o Fim?)."
+        fiberIds={otherFiberIds}
+        selected={ida}
+        onToggle={(id) => toggleList(setIda, id)}
+        search={searchIda}
+        onSearchChange={setSearchIda}
       />
 
-      <div style={listStyle}>
-        {filteredFiberIds.length === 0 && (
-          <p style={hintStyle}>Nenhum cabo encontrado para &quot;{search}&quot;.</p>
-        )}
-
-        {filteredFiberIds.map((id) => (
-          <label key={id} style={checkboxLabelStyle}>
-            <input
-              type="checkbox"
-              checked={derruba.includes(id)}
-              onChange={() => toggleDerruba(id)}
-            />
-            {id}
-          </label>
-        ))}
-      </div>
+      <FiberCheckboxList
+        title="Volta"
+        hint="Cabo(s) do retorno em verde após o fim — ordem do fim de volta até a origem."
+        fiberIds={otherFiberIds}
+        selected={volta}
+        onToggle={(id) => toggleList(setVolta, id)}
+        search={searchVolta}
+        onSearchChange={setSearchVolta}
+      />
 
       <div style={rowStyle}>
         <button type="button" style={btnStyle(true)} onClick={handleSave}>

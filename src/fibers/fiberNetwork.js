@@ -1,4 +1,7 @@
 import { withBaseUrl } from '../utils/baseUrl'
+import { normalizeUrRules, salvarConfiguracaoUr } from '../urs/urRules'
+
+export { salvarConfiguracaoUr }
 import { FIBER_ID_PATTERN } from './fibers'
 
 export const FIBER_CONFIG_API = withBaseUrl('api/config-fibra')
@@ -20,6 +23,8 @@ export function createEmptyLink(id) {
     from: '',
     to: '',
     principal: false,
+    ida: [],
+    volta: [],
     derruba: [],
     fim: false,
     radios: { lines: [], textos: [], imgs: [] },
@@ -28,21 +33,34 @@ export function createEmptyLink(id) {
   }
 }
 
-export function createEmptyNetwork(fiberIds = []) {
-  return {
-    nodes: [],
-    links: fiberIds.map((id) => createEmptyLink(id)),
-  }
+export function createEmptyNetwork(fiberIds = [], urCableIds = []) {
+  return normalizeNetwork({ nodes: [], links: [], urRules: [] }, fiberIds, urCableIds)
 }
 
-export function normalizeNetwork(raw, fiberIds = []) {
+export function normalizeNetwork(raw, fiberIds = [], urCableIds = []) {
   const network = {
     nodes: Array.isArray(raw?.nodes) ? [...raw.nodes] : [],
     links: Array.isArray(raw?.links) ? [...raw.links] : [],
+    urRules: normalizeUrRules(raw?.urRules, urCableIds),
   }
 
   const linkMap = new Map(
-    network.links.map((link) => [link.id, { ...createEmptyLink(link.id), ...link }]),
+    network.links
+      .filter((link) => link?.id)
+      .map((link) => {
+        const merged = { ...createEmptyLink(link.id), ...link }
+        const ida =
+          Array.isArray(merged.ida) && merged.ida.length > 0
+            ? merged.ida
+            : (merged.derruba ?? [])
+        const normalized = {
+          ...merged,
+          ida: [...ida],
+          volta: Array.isArray(merged.volta) ? [...merged.volta] : [],
+          derruba: [...ida],
+        }
+        return [normalized.id, normalized]
+      }),
   )
 
   fiberIds.forEach((id) => {
@@ -56,6 +74,36 @@ export function normalizeNetwork(raw, fiberIds = []) {
   )
 
   return network
+}
+
+/**
+ * Complementa `volta` a partir da `ida` (inversa), sem apagar volta já cadastrada manualmente.
+ */
+export function rebuildVoltaFromIda(network) {
+  const links = network.links
+    .filter((link) => link?.id)
+    .map((link) => {
+      const ida = getLinkIda(link)
+      const voltaManual = Array.isArray(link.volta) ? [...link.volta] : []
+      return {
+        ...link,
+        ida: [...ida],
+        derruba: [...ida],
+        volta: voltaManual,
+      }
+    })
+
+  const byId = new Map(links.map((link) => [link.id, link]))
+
+  for (const link of links) {
+    for (const nextId of link.ida) {
+      const next = byId.get(nextId)
+      if (!next || next.volta.includes(link.id)) continue
+      next.volta.push(link.id)
+    }
+  }
+
+  return { ...network, links }
 }
 
 async function fetchConfigJson() {
@@ -78,12 +126,12 @@ async function fetchConfigJson() {
   return { nodes: [], links: [] }
 }
 
-export async function fetchFiberNetwork(fiberIds = []) {
+export async function fetchFiberNetwork(fiberIds = [], urCableIds = []) {
   try {
     const raw = await fetchConfigJson()
-    return normalizeNetwork(raw, fiberIds)
+    return normalizeNetwork(raw, fiberIds, urCableIds)
   } catch {
-    return createEmptyNetwork(fiberIds)
+    return createEmptyNetwork(fiberIds, urCableIds)
   }
 }
 
@@ -111,9 +159,9 @@ export function exportFiberNetwork(network) {
   return JSON.stringify(network, null, 2)
 }
 
-export async function importFiberNetwork(jsonText, fiberIds = []) {
+export async function importFiberNetwork(jsonText, fiberIds = [], urCableIds = []) {
   const parsed = JSON.parse(jsonText)
-  const network = normalizeNetwork(parsed, fiberIds)
+  const network = normalizeNetwork(parsed, fiberIds, urCableIds)
   await persistFiberNetwork(network)
   return network
 }
@@ -144,14 +192,23 @@ export function salvarConfiguracaoCabo(caboId, dadosNovos, network) {
   return {
     ...network,
     links: network.links.map((link) => {
-      if (link.id !== caboId) return link
+      if (!link?.id || link.id !== caboId) return link
+
+      const ida = Array.isArray(dadosNovos.ida)
+        ? [...new Set(dadosNovos.ida)]
+        : Array.isArray(dadosNovos.derruba)
+          ? [...new Set(dadosNovos.derruba)]
+          : (link.ida ?? link.derruba ?? [])
+      const volta = Array.isArray(dadosNovos.volta)
+        ? [...new Set(dadosNovos.volta)]
+        : (link.volta ?? [])
 
       return {
         ...link,
         id: caboId,
-        derruba: Array.isArray(dadosNovos.derruba)
-          ? [...new Set(dadosNovos.derruba)]
-          : link.derruba ?? [],
+        ida,
+        volta,
+        derruba: ida,
         fim: Boolean(dadosNovos.fim),
         radios: dadosNovos.radios
           ? {
@@ -165,17 +222,143 @@ export function salvarConfiguracaoCabo(caboId, dadosNovos, network) {
   }
 }
 
+function getLinkIda(link) {
+  if (!link) return []
+  if (Array.isArray(link.ida) && link.ida.length > 0) return link.ida
+  return link.derruba ?? []
+}
+
+export function getLinkVolta(link) {
+  if (!link) return []
+  return Array.isArray(link.volta) ? link.volta.filter(Boolean) : []
+}
+
+/** Percorre o encadeamento `volta` a partir do cabo fim em direção à origem. */
+export function buildCaminhoVoltaPercorrido(caboFim, raiz, network) {
+  if (!caboFim || !network || caboFim === raiz) return []
+
+  const caminho = []
+  let current = caboFim
+  const visitados = new Set([caboFim])
+
+  while (current && current !== raiz) {
+    const link = getNetworkLink(network, current)
+    const proximo = getLinkVolta(link).find(
+      (id) => id && id !== raiz && !visitados.has(id),
+    )
+
+    if (!proximo) break
+
+    caminho.push(proximo)
+    visitados.add(proximo)
+    current = proximo
+  }
+
+  return caminho
+}
+
+/** Percorre todos os cabos em `volta` (BFS), não só o primeiro da lista. */
+export function buildCaminhoVoltaDesdeRaiz(raiz, network) {
+  if (!raiz || !network) return []
+
+  const caminho = []
+  const visitados = new Set([raiz])
+  const fila = getLinkVolta(getNetworkLink(network, raiz)).filter(
+    (id) => id && id !== raiz,
+  )
+
+  while (fila.length > 0) {
+    const caboId = fila.shift()
+    if (!caboId || visitados.has(caboId)) continue
+
+    visitados.add(caboId)
+    caminho.push(caboId)
+
+    getLinkVolta(getNetworkLink(network, caboId)).forEach((proximo) => {
+      if (proximo && proximo !== raiz && !visitados.has(proximo)) {
+        fila.push(proximo)
+      }
+    })
+  }
+
+  return caminho
+}
+
+/**
+ * Caminho de volta na simulação.
+ * Com cabos já caídos, usa o retorno desde a origem (ex.: 40 → … → 37).
+ */
+export function buildCaminhoVoltaCompleto(raiz, caboFim, network, cabosJaEmErro = []) {
+  if (!network || !raiz) return []
+
+  if (cabosJaEmErro.length > 0) {
+    return buildCaminhoVoltaDesdeRaiz(raiz, network)
+  }
+
+  if (caboFim && caboFim !== raiz) {
+    const desdeFim = buildCaminhoVoltaPercorrido(caboFim, raiz, network)
+    if (desdeFim.length > 0) return desdeFim
+  }
+
+  return buildCaminhoVoltaDesdeRaiz(raiz, network)
+}
+
+export function buildCaminhoVoltaParaRepintura(raiz, caboFim, network, cabosJaEmErro = []) {
+  if (!network || !raiz) return []
+
+  if (caboFim && caboFim !== raiz) {
+    const desdeFim = buildCaminhoVoltaPercorrido(caboFim, raiz, network)
+    if (desdeFim.length > 0) return desdeFim
+  }
+
+  return buildCaminhoVoltaCompleto(raiz, caboFim, network, cabosJaEmErro)
+}
+
+function buildOrdemVolta(ordemCascata, network) {
+  const raiz = ordemCascata[0]
+  const indiceFim = ordemCascata.findIndex(
+    (id) => getNetworkLink(network, id)?.fim,
+  )
+  const caboFim = indiceFim >= 0 ? ordemCascata[indiceFim] : null
+
+  const caminho = buildCaminhoVoltaCompleto(raiz, caboFim, network)
+  if (caminho.length > 0) return caminho
+
+  return ordemCascata.length > 1 ? [...ordemCascata.slice(1)].reverse() : []
+}
+
+/** Ramificações no hub de volta (ex.: cai o 76 → hub 37 → derruba 35, 36, 75). */
+function coletarRamosDoHub(link, network, processados, afetadosCabos, proximaOnda) {
+  if (!link) return
+
+  getLinkVolta(link).forEach((hubId) => {
+    const hub = getNetworkLink(network, hubId)
+    if (!hub) return
+
+    getLinkIda(hub).forEach((branchId) => {
+      afetadosCabos.add(branchId)
+      if (!processados.has(branchId)) proximaOnda.push(branchId)
+    })
+  })
+}
+
 function coletarProximaOnda(link, network, processados, afetadosCabos, afetadosNodes) {
   const proximaOnda = []
 
   if (!link) return proximaOnda
 
-  if (Array.isArray(link.derruba)) {
-    link.derruba.forEach((id) => {
-      afetadosCabos.add(id)
-      if (!processados.has(id)) proximaOnda.push(id)
-    })
-  }
+  getLinkIda(link).forEach((id) => {
+    afetadosCabos.add(id)
+    if (!processados.has(id)) proximaOnda.push(id)
+  })
+
+  // Cabos em `volta` no JSON = derrubam junto (ex.: 76 → 35, 36, 37, 75)
+  getLinkVolta(link).forEach((id) => {
+    afetadosCabos.add(id)
+    if (!processados.has(id)) proximaOnda.push(id)
+  })
+
+  coletarRamosDoHub(link, network, processados, afetadosCabos, proximaOnda)
 
   if (!link.to) return proximaOnda
 
@@ -261,9 +444,7 @@ export function calcularQuedaEmCascata(caboRaizIds, network) {
     radiosEvidentes = fimLink?.radios ?? null
   }
 
-  if (raiz && ordemCascata.length > 1) {
-    ordemVolta = [...ordemCascata.slice(1)].reverse()
-  }
+  ordemVolta = buildOrdemVolta(ordemCascata, network)
 
   return {
     cabos: [...cabosCascata],
@@ -335,6 +516,8 @@ export const EXAMPLE_FIBER_NETWORK = {
       from: 'BAS',
       to: 'PONTO_37',
       principal: true,
+      ida: ['cabo-37', 'cabo-61'],
+      volta: [],
       derruba: ['cabo-37', 'cabo-61'],
       equipamentosAfetados: [],
       observacao: '',
@@ -355,6 +538,8 @@ export const EXAMPLE_FIBER_NETWORK = {
       from: 'PONTO_37',
       to: 'SAGEM_11_1',
       principal: false,
+      ida: ['cabo-7'],
+      volta: [],
       derruba: ['cabo-7'],
       equipamentosAfetados: ['SAGEM_11_1'],
       observacao: '',

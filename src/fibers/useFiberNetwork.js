@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { bindUrConfigClicks } from '../urs/bindUrConfigClicks'
+import { extractUrCableIdsFromSvg } from '../urs/urRules'
 import { bindFiberClicks } from './bindFiberClicks'
 import {
   clearFiberFailureVisual,
   collectFibersInAlert,
+  collectFibersRealFall,
 } from './fiberFailure'
-import { paintFiberAlert, runCascadeSimulation } from './cascadeAnimation'
+import { applyFiberFailureInstant } from './cascadeAnimation'
 import { extractFiberIdsFromSvg } from './fibers'
 import {
   createEmptyNetwork,
@@ -17,6 +20,7 @@ import {
   mergeAfetados,
   persistFiberNetwork,
   salvarConfiguracaoCabo,
+  salvarConfiguracaoUr,
 } from './fiberNetwork'
 
 export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode }) {
@@ -24,21 +28,23 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
   const [networkLoading, setNetworkLoading] = useState(true)
   const [saveError, setSaveError] = useState(null)
   const [selectedLinkId, setSelectedLinkId] = useState(null)
+  const [selectedUrNumber, setSelectedUrNumber] = useState(null)
+  const [urCableIds, setUrCableIds] = useState([])
+  const [activeFailure, setActiveFailure] = useState({ cabos: [], nodes: [] })
   const lastFailureRef = useRef({ cabos: [], nodes: [] })
-  const cancelCascadeRef = useRef(null)
   const svgFiberIdsRef = useRef(fiberIds)
 
-  const loadNetwork = useCallback(async (ids = fiberIds) => {
+  const loadNetwork = useCallback(async (ids = fiberIds, urIds = urCableIds) => {
     setNetworkLoading(true)
     setSaveError(null)
 
     try {
-      const loaded = await fetchFiberNetwork(ids)
+      const loaded = await fetchFiberNetwork(ids, urIds)
       setNetwork(loaded)
     } finally {
       setNetworkLoading(false)
     }
-  }, [fiberIds])
+  }, [fiberIds, urCableIds])
 
   useEffect(() => {
     svgFiberIdsRef.current = fiberIds
@@ -66,7 +72,9 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
     if (!svg) return
 
     const ids = extractFiberIdsFromSvg(svg)
-    await loadNetwork(ids.length > 0 ? ids : fiberIds)
+    const urIds = extractUrCableIdsFromSvg(svg)
+    setUrCableIds(urIds)
+    await loadNetwork(ids.length > 0 ? ids : fiberIds, urIds)
   }, [getSvg, fiberIds, loadNetwork])
 
   const saveLinkConfig = useCallback(
@@ -80,39 +88,66 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
     [network, persistNetwork],
   )
 
+  const saveUrRuleConfig = useCallback(
+    async (urNumber, dados) => {
+      const next = salvarConfiguracaoUr(urNumber, dados, network)
+      if (!next) return false
+
+      await persistNetwork(next)
+      return true
+    },
+    [network, persistNetwork],
+  )
+
   const simulateDrop = useCallback(
     (caboIds, options = {}) => {
-      const ids = Array.isArray(caboIds) ? caboIds : [caboIds]
+      const ids = (Array.isArray(caboIds) ? caboIds : [caboIds]).filter(Boolean)
       const svg = getSvg()
       if (!svg || ids.length === 0) return { cabos: [], nodes: [], ordem: [] }
 
-      cancelCascadeRef.current?.()
+      let lastResultado = { cabos: [], nodes: [], ordem: [], ordemVolta: [] }
 
-      const resultado = getAfetadosMultiplos(ids, network)
+      ids.forEach((caboId) => {
+        const resultado = getAfetadosMultiplos([caboId], network)
+        lastResultado = resultado
 
-      const caboRaiz = ids[0]
-      const cabosJaEmErro = collectFibersInAlert(svg)
+        const cabosJaEmErro = [
+          ...new Set([
+            ...collectFibersRealFall(svg),
+            ...lastFailureRef.current.cabos,
+          ]),
+        ]
 
-      cancelCascadeRef.current = runCascadeSimulation(
-        svg,
-        { ...resultado, raiz: caboRaiz },
-        {
-          intervalMs: 320,
-          cabosJaEmErro,
-          onReachFim: options.onReachFim,
-          onComplete: (cabosFinaisVermelhos = []) => {
-            const cabos = [...new Set(cabosFinaisVermelhos)]
-            lastFailureRef.current = {
-              cabos,
-              nodes: resultado.nodes,
-            }
-
-            cabos.forEach((caboId) => paintFiberAlert(svg, caboId))
+        applyFiberFailureInstant(
+          svg,
+          { ...resultado, raiz: caboId },
+          {
+            network,
+            cabosJaEmErro,
+            cabosQueda: [caboId],
+            onReachFim: options.onReachFim,
+            onComplete: (cabosVermelhos = [], cabosRealmenteCaidos = []) => {
+              const cabos = [...new Set(cabosRealmenteCaidos)]
+              const failure = { cabos, nodes: resultado.nodes }
+              lastFailureRef.current = failure
+              setActiveFailure(failure)
+              const vermelhos = [
+                ...new Set([
+                  ...cabosVermelhos,
+                  ...collectFibersInAlert(svg),
+                ]),
+              ]
+              options.onAfterFiberFailure?.(vermelhos)
+            },
           },
-        },
-      )
+        )
+      })
 
-      return { resultado, ordem: resultado.ordem, ordemVolta: resultado.ordemVolta }
+      return {
+        resultado: lastResultado,
+        ordem: lastResultado.ordem,
+        ordemVolta: lastResultado.ordemVolta,
+      }
     },
     [getSvg, network],
   )
@@ -121,28 +156,35 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
     const svg = getSvg()
     if (!svg) return
 
-    cancelCascadeRef.current?.()
-    cancelCascadeRef.current = null
     clearFiberFailureVisual(svg, lastFailureRef.current)
     lastFailureRef.current = { cabos: [], nodes: [] }
+    setActiveFailure({ cabos: [], nodes: [] })
   }, [getSvg])
+
+  const clearSaveError = useCallback(() => {
+    setSaveError(null)
+  }, [])
 
   const exportNetwork = useCallback(() => exportFiberNetwork(network), [network])
 
   const importNetwork = useCallback(
     async (jsonText) => {
-      const next = await importFiberNetwork(jsonText, svgFiberIdsRef.current)
+      const next = await importFiberNetwork(
+        jsonText,
+        svgFiberIdsRef.current,
+        urCableIds,
+      )
       setNetwork(next)
       setSaveError(null)
       return next
     },
-    [],
+    [urCableIds],
   )
 
   const resetNetworkStorage = useCallback(async () => {
-    const next = createEmptyNetwork(svgFiberIdsRef.current)
+    const next = createEmptyNetwork(svgFiberIdsRef.current, urCableIds)
     await persistNetwork(next)
-  }, [persistNetwork])
+  }, [persistNetwork, urCableIds])
 
   const loadExample = useCallback(async () => {
     const next = await loadExampleFiberNetwork(svgFiberIdsRef.current)
@@ -161,11 +203,21 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
       enabled,
       onFiberClick: (fiberId) => {
         setSelectedLinkId(fiberId)
+        setSelectedUrNumber(null)
+      },
+    })
+
+    bindUrConfigClicks(svg, {
+      enabled,
+      onUrClick: (urNumber) => {
+        setSelectedUrNumber(urNumber)
+        setSelectedLinkId(null)
       },
     })
 
     return () => {
       bindFiberClicks(svg, { enabled: false })
+      bindUrConfigClicks(svg, { enabled: false })
     }
   }, [getSvg, interactionMode, configMode])
 
@@ -173,9 +225,15 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
     network,
     networkLoading,
     saveError,
+    clearSaveError,
+    activeFailure,
     selectedLinkId,
     setSelectedLinkId,
+    selectedUrNumber,
+    setSelectedUrNumber,
+    urCableIds,
     saveLinkConfig,
+    saveUrRuleConfig,
     simulateDrop,
     clearSimulation,
     exportNetwork,
