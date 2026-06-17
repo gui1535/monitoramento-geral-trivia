@@ -4,14 +4,13 @@ import {
   UR_ENERGY_TYPES,
 } from './urEnergyIcon.constants'
 import { getUrGroup, UR_NUMBERS } from './urs'
-import iconEnergiaUrl from '../../assets/icon_energia.png?url'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 const XLINK_NS = 'http://www.w3.org/1999/xlink'
 const ENERGIA_LAYER_ID = 'monitoramento-ur-energia'
 const ICON_ID_PREFIX = 'ur-energia-'
 
-export const UR_ENERGY_ICON_URL = iconEnergiaUrl
+export const UR_ENERGY_ICON_URL = `${import.meta.env.BASE_URL}icon_energia.png`
 
 /** @deprecated use UR_ENERGY_ICON_URL — mantido para referências legadas. */
 export const UR_ENERGY_LETTER = 'E'

@@ -675,20 +675,14 @@
       "principal": false,
       "ida": [
         "cabo-77",
-        "cabo-30",
-        "cabo-29",
-        "cabo-28",
-        "cabo-78"
+        "cabo-30"
       ],
       "volta": [
         "cabo-32"
       ],
       "derruba": [
         "cabo-77",
-        "cabo-30",
-        "cabo-29",
-        "cabo-28",
-        "cabo-78"
+        "cabo-30"
       ],
       "fim": false,
       "radios": {
@@ -1752,11 +1746,19 @@
       "from": "",
       "to": "",
       "principal": false,
-      "ida": [],
+      "ida": [
+        "cabo-29",
+        "cabo-28",
+        "cabo-78"
+      ],
       "volta": [
         "cabo-31"
       ],
-      "derruba": [],
+      "derruba": [
+        "cabo-29",
+        "cabo-28",
+        "cabo-78"
+      ],
       "fim": false,
       "radios": {
         "lines": [],

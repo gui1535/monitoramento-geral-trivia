@@ -9,6 +9,7 @@ const rootFiles = [
   'index.html',
   '404.html',
   'favicon.svg',
+  'icon_energia.png',
   'config-fibra.json',
   'esquema-gerencia.svg',
   'logotipo-azul.png',
