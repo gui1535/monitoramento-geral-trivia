@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import {
-  DEMO_CLEAR_PRESETS,
   DEMO_PRESET_VARIANT,
   DEMO_PRESETS,
   runDemoPreset,
@@ -43,15 +42,6 @@ const contentStyle = {
   flexDirection: 'column',
   gap: 16,
   overflowY: 'auto',
-}
-
-const sectionTitleStyle = {
-  margin: '0 0 8px',
-  fontSize: 13,
-  fontWeight: 600,
-  color: colors.textMuted,
-  textTransform: 'uppercase',
-  letterSpacing: '0.04em',
 }
 
 const inputStyle = {
@@ -246,23 +236,11 @@ function ControllerView({ sync, onSend }) {
         <p style={feedbackStyle}>Enviado: {lastAction}</p>
       )}
 
-      <section>
-        <h3 style={sectionTitleStyle}>Simular falhas</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {DEMO_PRESETS.map((preset) => (
-            <PresetButton key={preset.id} preset={preset} onRun={handleRun} />
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h3 style={sectionTitleStyle}>Restaurar</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {DEMO_CLEAR_PRESETS.map((preset) => (
-            <PresetButton key={preset.id} preset={preset} onRun={handleRun} />
-          ))}
-        </div>
-      </section>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {DEMO_PRESETS.map((preset) => (
+          <PresetButton key={preset.id} preset={preset} onRun={handleRun} />
+        ))}
+      </div>
 
       <button type="button" style={secondaryBtnStyle} onClick={sync.disconnect}>
         Desconectar

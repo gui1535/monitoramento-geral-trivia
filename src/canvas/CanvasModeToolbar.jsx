@@ -2,10 +2,19 @@ import { useState } from 'react'
 import { INTERACTION_MODE } from './constants'
 import { colors } from '../styles/tokens'
 
-const toolbarStyle = {
+export const EBILOCK_URL = 'https://oilopez.github.io/PROJETO-GERENCIA-TRIVIA/'
+
+const toolbarRowStyle = {
   position: 'absolute',
   top: 16,
   left: 16,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  pointerEvents: 'auto',
+}
+
+const toolbarStyle = {
   display: 'flex',
   gap: 4,
   padding: 4,
@@ -13,7 +22,6 @@ const toolbarStyle = {
   background: colors.surface,
   border: `1px solid ${colors.border}`,
   boxShadow: '0 2px 8px rgba(18, 20, 26, 0.1)',
-  pointerEvents: 'auto',
 }
 
 function modeButtonStyle(active, hovered) {
@@ -50,6 +58,31 @@ function ModeButton({ label, active, onClick }) {
   )
 }
 
+function EbilockLink() {
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <a
+      href={EBILOCK_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        ...modeButtonStyle(false, hovered),
+        display: 'inline-flex',
+        alignItems: 'center',
+        textDecoration: 'none',
+        background: hovered ? colors.bg : colors.surface,
+        border: `1px solid ${colors.border}`,
+        boxShadow: '0 2px 8px rgba(18, 20, 26, 0.1)',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      Ebilock
+    </a>
+  )
+}
+
 const BASE_MODES = [
   { id: INTERACTION_MODE.NAVIGATION, label: 'Navegação' },
   { id: INTERACTION_MODE.ACTION, label: 'Ação' },
@@ -67,19 +100,25 @@ export function CanvasModeToolbar({ mode, onModeChange, showFiberConfig = false 
 
   return (
     <div
-      style={toolbarStyle}
-      role="toolbar"
-      aria-label="Modo do canvas"
+      style={toolbarRowStyle}
       onPointerDown={(event) => event.stopPropagation()}
     >
-      {modes.map((item) => (
-        <ModeButton
-          key={item.id}
-          label={item.label}
-          active={mode === item.id}
-          onClick={() => onModeChange(item.id)}
-        />
-      ))}
+      <div
+        style={toolbarStyle}
+        role="toolbar"
+        aria-label="Modo do canvas"
+      >
+        {modes.map((item) => (
+          <ModeButton
+            key={item.id}
+            label={item.label}
+            active={mode === item.id}
+            onClick={() => onModeChange(item.id)}
+          />
+        ))}
+      </div>
+
+      <EbilockLink />
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { RADIO_ALERT_KIND } from '../radios/radios'
 import { UR_ENERGY_TYPE } from '../urs/urEnergyIcon.constants'
 import { ERROR_CATEGORY, ERROR_SEVERITY } from './monitoringErrors'
 
@@ -30,7 +31,10 @@ function buildActiveSnapshot({
     snapshot.set(sourceKey, {
       sourceKey,
       category: ERROR_CATEGORY.RADIO,
-      severity: ERROR_SEVERITY.INFO,
+      severity:
+        radioAlert.kind === RADIO_ALERT_KIND.UNSTABLE
+          ? ERROR_SEVERITY.WARNING
+          : ERROR_SEVERITY.INFO,
       title: radioAlert.title,
       message: radioAlert.detail,
     })

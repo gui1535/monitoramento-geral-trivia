@@ -1,10 +1,10 @@
-import { UR_ENERGY_TYPE } from '../urs/urEnergyIcon.constants'
 import {
-  createClearSimulationMessage,
-  createClearUrSemEnergiaMessage,
-  createFiberDropMessage,
+  createFixedSimulationMessage,
+  createRadioUnstableMessage,
   createUrSemEnergiaMessage,
 } from './demoSyncMessages'
+import { FIXED_SIM_SCENARIO } from './fixedSimulation'
+import { UR_ENERGY_TYPE } from '../urs/urEnergyIcon.constants'
 
 export const DEMO_PRESET_VARIANT = {
   DANGER: 'danger',
@@ -12,83 +12,50 @@ export const DEMO_PRESET_VARIANT = {
   NEUTRAL: 'neutral',
 }
 
-/** Cenários prontos enviados ao PC — sem seleção manual no celular. */
+/** Cenários fixos do simulador — lógica hardcoded até integrar backend. */
 export const DEMO_PRESETS = [
   {
-    id: 'fiber-37',
-    label: 'Cair fibra',
-    description: 'Queda no cabo 37',
+    id: 'left-side',
+    label: 'Cair lado esquerdo',
+    description: 'Queda no cabo 37; rádio assume o outro lado',
     variant: DEMO_PRESET_VARIANT.DANGER,
-    getMessages: () => [createFiberDropMessage(['cabo-37'])],
+    getMessages: () => [
+      createFixedSimulationMessage(FIXED_SIM_SCENARIO.LEFT_SIDE),
+    ],
   },
   {
-    id: 'fiber-42',
-    label: 'Cair fibra (cabo 42)',
-    description: 'Segunda queda em cascata',
+    id: 'right-side',
+    label: 'Cair lado direito',
+    description: 'Trecho direito vermelho; 37 e 42 queda real',
     variant: DEMO_PRESET_VARIANT.DANGER,
-    getMessages: () => [createFiberDropMessage(['cabo-42'])],
+    getMessages: () => [
+      createFixedSimulationMessage(FIXED_SIM_SCENARIO.RIGHT_SIDE),
+    ],
   },
   {
-    id: 'fiber-37-42',
-    label: 'Cair fibras 37 e 42',
-    description: 'Duas quedas de uma vez',
-    variant: DEMO_PRESET_VARIANT.DANGER,
-    getMessages: () => [createFiberDropMessage(['cabo-37', 'cabo-42'])],
-  },
-  {
-    id: 'ur-energy-2-falta1',
-    label: 'Cair energia da UR 2',
-    description: 'Falta energia 1 (esquerda)',
+    id: 'ur-18-ctc-1',
+    label: 'UR 18 - Cair energia CTC 1',
+    description: 'Falta de energia 1 na UR 18',
     variant: DEMO_PRESET_VARIANT.WARNING,
     getMessages: () => [
-      createUrSemEnergiaMessage(2, UR_ENERGY_TYPE.FALTA_1, true),
+      createUrSemEnergiaMessage(18, UR_ENERGY_TYPE.FALTA_1, true),
     ],
   },
   {
-    id: 'ur-energy-2-falta2',
-    label: 'Cair energia UR 2 (lado 2)',
-    description: 'Falta energia 2 (direita)',
+    id: 'ur-18-ctc-2',
+    label: 'UR 18 - Cair energia CTC 2',
+    description: 'Falta de energia 2 na UR 18',
     variant: DEMO_PRESET_VARIANT.WARNING,
     getMessages: () => [
-      createUrSemEnergiaMessage(2, UR_ENERGY_TYPE.FALTA_2, true),
+      createUrSemEnergiaMessage(18, UR_ENERGY_TYPE.FALTA_2, true),
     ],
   },
   {
-    id: 'ur-energy-2-both',
-    label: 'Cair energia UR 2 (ambos)',
-    description: 'Falta energia 1 e 2',
+    id: 'radio-unstable',
+    label: 'Rádio instável',
+    description: 'Simula falha/instabilidade no enlace de rádio',
     variant: DEMO_PRESET_VARIANT.WARNING,
-    getMessages: () => [
-      createUrSemEnergiaMessage(2, UR_ENERGY_TYPE.FALTA_1, true),
-      createUrSemEnergiaMessage(2, UR_ENERGY_TYPE.FALTA_2, true),
-    ],
-  },
-]
-
-export const DEMO_CLEAR_PRESETS = [
-  {
-    id: 'clear-fiber',
-    label: 'Restaurar fibras',
-    description: 'Remove quedas simuladas',
-    variant: DEMO_PRESET_VARIANT.NEUTRAL,
-    getMessages: () => [createClearSimulationMessage()],
-  },
-  {
-    id: 'clear-ur-energy',
-    label: 'Restaurar energia URs',
-    description: 'Liga energia em todas',
-    variant: DEMO_PRESET_VARIANT.NEUTRAL,
-    getMessages: () => [createClearUrSemEnergiaMessage()],
-  },
-  {
-    id: 'clear-all',
-    label: 'Limpar tudo',
-    description: 'Fibras e energia',
-    variant: DEMO_PRESET_VARIANT.NEUTRAL,
-    getMessages: () => [
-      createClearSimulationMessage(),
-      createClearUrSemEnergiaMessage(),
-    ],
+    getMessages: () => [createRadioUnstableMessage()],
   },
 ]
 

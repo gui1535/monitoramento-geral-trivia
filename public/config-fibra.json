@@ -675,20 +675,14 @@
       "principal": false,
       "ida": [
         "cabo-77",
-        "cabo-30",
-        "cabo-29",
-        "cabo-28",
-        "cabo-78"
+        "cabo-30"
       ],
       "volta": [
         "cabo-32"
       ],
       "derruba": [
         "cabo-77",
-        "cabo-30",
-        "cabo-29",
-        "cabo-28",
-        "cabo-78"
+        "cabo-30"
       ],
       "fim": false,
       "radios": {
@@ -1752,11 +1746,19 @@
       "from": "",
       "to": "",
       "principal": false,
-      "ida": [],
+      "ida": [
+        "cabo-29",
+        "cabo-28",
+        "cabo-78"
+      ],
       "volta": [
         "cabo-31"
       ],
-      "derruba": [],
+      "derruba": [
+        "cabo-29",
+        "cabo-28",
+        "cabo-78"
+      ],
       "fim": false,
       "radios": {
         "lines": [],
@@ -1885,331 +1887,321 @@
       "ur": 1,
       "habilitado": false,
       "minCabosVermelhos": 2,
-      "cabos": [
-        "cabo-ur-1"
-      ]
+      "cabos": []
     },
     {
       "ur": 2,
       "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-1",
-        "cabo-ur-2",
         "cabo-54",
         "cabo-55"
       ]
     },
     {
       "ur": 3,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-2",
-        "cabo-ur-3"
+        "cabo-54",
+        "cabo-55"
       ]
     },
     {
       "ur": 4,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-3",
-        "cabo-ur-4"
+        "cabo-55",
+        "cabo-56"
       ]
     },
     {
       "ur": 5,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-4",
-        "cabo-ur-5"
+        "cabo-55",
+        "cabo-56"
       ]
     },
     {
       "ur": 6,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-5",
-        "cabo-ur-6"
+        "cabo-57",
+        "cabo-58"
       ]
     },
     {
       "ur": 7,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-6",
-        "cabo-ur-7"
+        "cabo-57",
+        "cabo-58"
       ]
     },
     {
       "ur": 8,
       "habilitado": false,
       "minCabosVermelhos": 2,
-      "cabos": [
-        "cabo-ur-7",
-        "cabo-ur-8"
-      ]
+      "cabos": []
     },
     {
       "ur": 9,
       "habilitado": false,
       "minCabosVermelhos": 2,
-      "cabos": [
-        "cabo-ur-8",
-        "cabo-ur-9"
-      ]
+      "cabos": []
     },
     {
       "ur": 10,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-9",
-        "cabo-ur-10"
+        "cabo-60",
+        "cabo-61"
       ]
     },
     {
       "ur": 11,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-10",
-        "cabo-ur-11"
+        "cabo-60",
+        "cabo-61"
       ]
     },
     {
       "ur": 12,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-11",
-        "cabo-ur-12"
+        "cabo-62",
+        "cabo-63"
       ]
     },
     {
       "ur": 13,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-12",
-        "cabo-ur-13"
+        "cabo-62",
+        "cabo-63"
       ]
     },
     {
       "ur": 14,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-13",
-        "cabo-ur-14"
+        "cabo-62",
+        "cabo-63"
       ]
     },
     {
       "ur": 15,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-14",
-        "cabo-ur-15"
+        "cabo-63",
+        "cabo-64"
       ]
     },
     {
       "ur": 16,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-15",
-        "cabo-ur-16"
+        "cabo-63",
+        "cabo-64"
       ]
     },
     {
       "ur": 17,
       "habilitado": false,
       "minCabosVermelhos": 2,
-      "cabos": [
-        "cabo-ur-16",
-        "cabo-ur-17"
-      ]
+      "cabos": []
     },
     {
       "ur": 18,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-17",
-        "cabo-ur-18"
+        "cabo-76",
+        "cabo-33"
       ]
     },
     {
       "ur": 19,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-18",
-        "cabo-ur-19"
+        "cabo-76",
+        "cabo-33"
       ]
     },
     {
       "ur": 20,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-19",
-        "cabo-ur-20"
+        "cabo-33",
+        "cabo-32"
       ]
     },
     {
       "ur": 21,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-20",
-        "cabo-ur-21"
+        "cabo-33",
+        "cabo-32"
       ]
     },
     {
       "ur": 22,
       "habilitado": false,
       "minCabosVermelhos": 2,
-      "cabos": [
-        "cabo-ur-21",
-        "cabo-ur-22"
-      ]
+      "cabos": []
     },
     {
       "ur": 23,
       "habilitado": false,
       "minCabosVermelhos": 2,
-      "cabos": [
-        "cabo-ur-22",
-        "cabo-ur-23"
-      ]
+      "cabos": []
     },
     {
       "ur": 24,
       "habilitado": false,
       "minCabosVermelhos": 2,
-      "cabos": [
-        "cabo-ur-23",
-        "cabo-ur-24"
-      ]
+      "cabos": []
     },
     {
       "ur": 25,
       "habilitado": false,
       "minCabosVermelhos": 2,
-      "cabos": [
-        "cabo-ur-24",
-        "cabo-ur-25"
-      ]
+      "cabos": []
     },
     {
       "ur": 26,
       "habilitado": false,
       "minCabosVermelhos": 2,
-      "cabos": [
-        "cabo-ur-25",
-        "cabo-ur-26"
-      ]
+      "cabos": []
     },
     {
       "ur": 27,
       "habilitado": false,
       "minCabosVermelhos": 2,
-      "cabos": [
-        "cabo-ur-26",
-        "cabo-ur-27"
-      ]
+      "cabos": []
     },
     {
       "ur": 28,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-27",
-        "cabo-ur-28"
+        "cabo-40",
+        "cabo-41"
       ]
     },
     {
       "ur": 29,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-28",
-        "cabo-ur-29"
+        "cabo-40",
+        "cabo-41"
       ]
     },
     {
       "ur": 30,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-29",
-        "cabo-ur-30"
+        "cabo-42",
+        "cabo-43"
       ]
     },
     {
       "ur": 31,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-30",
-        "cabo-ur-31"
+        "cabo-42",
+        "cabo-43"
       ]
     },
     {
       "ur": 32,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
       "cabos": [
-        "cabo-ur-31"
+        "cabo-42",
+        "cabo-43"
       ]
     },
     {
       "ur": 33,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
-      "cabos": []
+      "cabos": [
+        "cabo-43",
+        "cabo-44"
+      ]
     },
     {
       "ur": 34,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
-      "cabos": []
+      "cabos": [
+        "cabo-43",
+        "cabo-44"
+      ]
     },
     {
       "ur": 35,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
-      "cabos": []
+      "cabos": [
+        "cabo-44",
+        "cabo-45"
+      ]
     },
     {
       "ur": 36,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
-      "cabos": []
+      "cabos": [
+        "cabo-44",
+        "cabo-45"
+      ]
     },
     {
       "ur": 37,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
-      "cabos": []
+      "cabos": [
+        "cabo-47",
+        "cabo-48"
+      ]
     },
     {
       "ur": 38,
-      "habilitado": false,
+      "habilitado": true,
       "minCabosVermelhos": 2,
-      "cabos": []
+      "cabos": [
+        "cabo-47",
+        "cabo-48"
+      ]
     },
     {
       "ur": 39,
-      "habilitado": false,
-      "minCabosVermelhos": 2,
-      "cabos": []
+      "habilitado": true,
+      "minCabosVermelhos": 1,
+      "cabos": [
+        "cabo-48"
+      ]
     }
   ]
 }

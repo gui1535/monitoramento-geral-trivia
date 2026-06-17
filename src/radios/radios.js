@@ -3,7 +3,14 @@ import { useCallback, useRef } from 'react'
 export const RADIO_DIM_OPACITY = 0.22
 export const RADIO_ACTIVE_OPACITY = 1
 export const RADIO_EVIDENT_CLASS = 'radio-evidente'
+export const RADIO_UNSTABLE_CLASS = 'radio-instavel'
 export const RADIO_OK_COLOR = '#00FF48'
+export const RADIO_UNSTABLE_COLOR = '#e65100'
+
+export const RADIO_ALERT_KIND = {
+  OK: 'ok',
+  UNSTABLE: 'unstable',
+}
 
 export function createEmptyRadios() {
   return { lines: [], textos: [], imgs: [] }
@@ -139,17 +146,29 @@ export function formatRadioFunctioningMessage(radios) {
 
   if (!hadExplicit) {
     return {
+      kind: RADIO_ALERT_KIND.OK,
       title: 'Rádio em funcionamento',
       detail: 'Os rádios estão em funcionamento.',
     }
   }
 
-  const selection = normalizeRadiosSelection(radios)
-
+  normalizeRadiosSelection(radios)
 
   return {
+    kind: RADIO_ALERT_KIND.OK,
     title: 'Rádio em funcionamento',
-    detail: `Os rádios estão em funcionamento.`,
+    detail: 'Os rádios estão em funcionamento.',
+  }
+}
+
+export function formatRadioUnstableMessage(radios) {
+  normalizeRadiosSelection(radios)
+
+  return {
+    kind: RADIO_ALERT_KIND.UNSTABLE,
+    title: 'Rádio instável',
+    detail:
+      'Enlace de rádio com instabilidade. Verifique sinal e alimentação das torres.',
   }
 }
 
@@ -253,15 +272,87 @@ export function clearRadioHighlight(svgRoot) {
   })
 }
 
+function storeRadioStrokeDefault(element) {
+  if (!element.dataset.radioStrokeDefault) {
+    element.dataset.radioStrokeDefault = element.getAttribute('stroke') ?? 'black'
+  }
+}
+
+function applyRadioUnstableVisual(element, elementId) {
+  if (!element) return
+
+  element.classList.remove(RADIO_EVIDENT_CLASS, 'antena-funcionando')
+  element.classList.add(RADIO_UNSTABLE_CLASS)
+  setElementOpacity(element, RADIO_ACTIVE_OPACITY)
+
+  if (isRadioLineId(elementId)) {
+    storeRadioStrokeDefault(element)
+    element.setAttribute('stroke', RADIO_UNSTABLE_COLOR)
+    element.style.setProperty('stroke', RADIO_UNSTABLE_COLOR, 'important')
+  }
+}
+
+function clearRadioUnstableVisual(element, elementId) {
+  if (!element) return
+
+  element.classList.remove(RADIO_UNSTABLE_CLASS)
+
+  if (isRadioLineId(elementId)) {
+    const stroke = element.dataset.radioStrokeDefault ?? 'black'
+    element.setAttribute('stroke', stroke)
+    element.style.removeProperty('stroke')
+    delete element.dataset.radioStrokeDefault
+  }
+}
+
+/** Exibe enlace de rádio com animação de instabilidade. */
+export function applyRadioUnstable(svgRoot, radios) {
+  const selection = normalizeRadiosSelection(radios)
+
+  clearRadioHighlight(svgRoot)
+  applyRadioVisibility(svgRoot, selection)
+
+  const unstableIds = new Set([
+    ...selection.lines,
+    ...selection.textos,
+    ...selection.imgs,
+  ])
+
+  ALL_ELEMENT_IDS.forEach((id) => {
+    const element = getSvgElement(svgRoot, id)
+    if (!element) return
+
+    if (unstableIds.has(id)) {
+      applyRadioUnstableVisual(element, id)
+    } else {
+      clearRadioUnstableVisual(element, id)
+      setElementVisible(svgRoot, id, false)
+    }
+  })
+
+  return selection
+}
+
+export function clearRadioUnstable(svgRoot) {
+  ALL_ELEMENT_IDS.forEach((id) => {
+    clearRadioUnstableVisual(getSvgElement(svgRoot, id), id)
+  })
+}
+
 export function useRadioDiagram() {
   const svgRef = useRef(null)
   const visibilityRef = useRef({ lines: [], textos: [], imgs: [] })
   const cascadeHighlightRef = useRef(false)
+  const unstableRef = useRef(false)
 
   const registerSvg = useCallback((svgElement) => {
     svgRef.current = svgElement
     initAllRadiosDimmed(svgElement)
-    applyRadioVisibility(svgElement, visibilityRef.current)
+    if (unstableRef.current) {
+      applyRadioUnstable(svgElement, visibilityRef.current)
+    } else {
+      applyRadioVisibility(svgElement, visibilityRef.current)
+    }
   }, [])
 
   const applyVisibility = useCallback((selection) => {
@@ -270,17 +361,27 @@ export function useRadioDiagram() {
       textos: selection.textos ?? [],
       imgs: selection.imgs ?? [],
     }
+
+    if (unstableRef.current) {
+      applyRadioUnstable(svgRef.current, visibilityRef.current)
+      return
+    }
+
     applyRadioVisibility(svgRef.current, visibilityRef.current)
   }, [])
 
   const resetRadios = useCallback(() => {
     cascadeHighlightRef.current = false
+    unstableRef.current = false
     visibilityRef.current = { lines: [], textos: [], imgs: [] }
+    clearRadioUnstable(svgRef.current)
     clearRadioHighlight(svgRef.current)
     initAllRadiosDimmed(svgRef.current)
   }, [])
 
   const highlightForCascade = useCallback((radios) => {
+    unstableRef.current = false
+    clearRadioUnstable(svgRef.current)
     cascadeHighlightRef.current = true
     highlightRadios(svgRef.current, radios)
   }, [])
@@ -290,6 +391,28 @@ export function useRadioDiagram() {
 
     cascadeHighlightRef.current = false
     clearRadioHighlight(svgRef.current)
+    if (unstableRef.current) {
+      applyRadioUnstable(svgRef.current, visibilityRef.current)
+    } else {
+      applyRadioVisibility(svgRef.current, visibilityRef.current)
+    }
+  }, [])
+
+  const simulateUnstable = useCallback((radios) => {
+    cascadeHighlightRef.current = false
+    clearRadioHighlight(svgRef.current)
+    unstableRef.current = true
+    const selection = normalizeRadiosSelection(radios)
+    visibilityRef.current = selection
+    applyRadioUnstable(svgRef.current, selection)
+    return selection
+  }, [])
+
+  const clearUnstable = useCallback(() => {
+    if (!unstableRef.current) return
+
+    unstableRef.current = false
+    clearRadioUnstable(svgRef.current)
     applyRadioVisibility(svgRef.current, visibilityRef.current)
   }, [])
 
@@ -299,6 +422,8 @@ export function useRadioDiagram() {
     resetRadios,
     highlightForCascade,
     clearCascadeHighlight,
+    simulateUnstable,
+    clearUnstable,
     radioLineOptions: RADIO_LINE_OPTIONS,
     torreTextoOptions: TORRE_TEXTO_OPTIONS,
     torreImgOptions: TORRE_IMG_OPTIONS,

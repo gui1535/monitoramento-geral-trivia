@@ -24,14 +24,15 @@ export function bindUrConfigClicks(svgRoot, { enabled = false, onUrClick } = {})
       urClickHandlers.delete(group)
     }
 
-    group.style.pointerEvents = enabled ? 'auto' : 'none'
-    group.style.cursor = enabled ? 'pointer' : 'default'
+    if (!enabled) continue
+
+    group.style.pointerEvents = 'auto'
+    group.style.cursor = 'pointer'
 
     group.querySelectorAll('rect').forEach((rect) => {
-      rect.style.pointerEvents = enabled ? 'auto' : 'none'
+      rect.style.pointerEvents = 'auto'
+      rect.style.cursor = 'pointer'
     })
-
-    if (!enabled) continue
 
     const handler = (event) => {
       event.stopPropagation()

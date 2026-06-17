@@ -11,7 +11,7 @@ import {
   serializeSemEnergiaPorUr,
   syncUrEnergyIcons,
 } from './urEnergyIcon'
-import { UR_ENERGY_TYPE } from './urEnergyIcon.constants'
+import { UR_ENERGY_TYPE, UR_ENERGY_TYPES } from './urEnergyIcon.constants'
 import { evaluateUrFallsFromRedFibers } from './urRules'
 
 export const UR_NUMBERS = Array.from({ length: 39 }, (_, index) => index + 1)
@@ -43,6 +43,38 @@ const clickHandlers = new WeakMap()
 
 export function getUrButtonId(number) {
   return `btn-ur-${number}`
+}
+
+export function normalizeUrNumber(urNumber) {
+  const ur = Number(urNumber)
+  if (!Number.isFinite(ur) || ur < 1) return null
+  return ur
+}
+
+function getEnergyTiposForUr(map, urNumber) {
+  const ur = normalizeUrNumber(urNumber)
+  if (!ur) return new Set()
+
+  const tipos = new Set([
+    ...(map.get(ur) ?? []),
+    ...(map.get(String(ur)) ?? []),
+  ])
+
+  return tipos
+}
+
+function writeEnergyTiposForUr(map, urNumber, tipos) {
+  const ur = normalizeUrNumber(urNumber)
+  if (!ur) return null
+
+  map.delete(String(ur))
+  if (tipos.size > 0) {
+    map.set(ur, tipos)
+  } else {
+    map.delete(ur)
+  }
+
+  return ur
 }
 
 function getSvgScope(svgRoot) {
@@ -137,6 +169,19 @@ export function applyUrActive(svgRoot, urNumber, active = true) {
   )
 }
 
+export function hasBothEnergyFailures(tipos) {
+  if (!tipos) return false
+  const types = tipos instanceof Set ? tipos : new Set(tipos)
+  return (
+    types.has(UR_ENERGY_TYPE.FALTA_1) && types.has(UR_ENERGY_TYPE.FALTA_2)
+  )
+}
+
+export function shouldUrBeInactiveFromEnergy(tipos, fallenFromFiber = false) {
+  if (fallenFromFiber) return true
+  return hasBothEnergyFailures(tipos)
+}
+
 export function toggleUrActive(svgRoot, urNumber) {
   const group = getUrGroup(svgRoot, urNumber)
   if (!group) return null
@@ -197,6 +242,14 @@ function applyUrDisconnect(svgRoot, number, activeUrsRef, uprightChavesRef, call
 export function bindUrButtons(svgRoot, { enabled = false, onUrClickRequest } = {}) {
   if (!svgRoot) return
 
+  const scope = getSvgScope(svgRoot)
+  if (scope) {
+    scope.classList.toggle('monitoramento-modo-acao', enabled)
+    if (!enabled) {
+      scope.style.removeProperty('pointer-events')
+    }
+  }
+
   UR_NUMBERS.forEach((number) => {
     const group = getUrGroup(svgRoot, number)
     if (!group) return
@@ -212,6 +265,11 @@ export function bindUrButtons(svgRoot, { enabled = false, onUrClickRequest } = {
 
     group.querySelectorAll('rect').forEach((rect) => {
       rect.style.pointerEvents = enabled ? 'auto' : 'none'
+      if (enabled) {
+        rect.style.cursor = 'pointer'
+      } else {
+        rect.style.removeProperty('cursor')
+      }
     })
 
     if (!enabled) return
@@ -229,6 +287,8 @@ export function bindUrButtons(svgRoot, { enabled = false, onUrClickRequest } = {
 
 export function useUrDiagram(interactionMode) {
   const svgRef = useRef(null)
+  const interactionModeRef = useRef(interactionMode)
+  interactionModeRef.current = interactionMode
   const onUrClickRef = useRef(null)
   const onChaveClickRef = useRef(null)
   const activeUrsRef = useRef(new Set())
@@ -250,9 +310,69 @@ export function useUrDiagram(interactionMode) {
     })
   }, [])
 
+  const syncUrButtonFromEnergyState = useCallback((urNumber) => {
+    const ur = normalizeUrNumber(urNumber)
+    const svg = svgRef.current
+    if (!ur || !svg || !getUrGroup(svg, ur)) return
+
+    const tipos = getEnergyTiposForUr(semEnergiaPorUrRef.current, ur)
+    const fallenFromFiber = ursCaidasPorFibraRef.current.has(ur)
+    const shouldBeInactive = shouldUrBeInactiveFromEnergy(tipos, fallenFromFiber)
+
+    if (shouldBeInactive) {
+      applyUrStatus(svg, ur, UR_STATUS.INACTIVE)
+      activeUrsRef.current.delete(ur)
+      return
+    }
+
+    applyUrActive(svg, ur, true)
+    activeUrsRef.current.add(ur)
+  }, [])
+
+  const syncAllUrButtonsFromEnergyState = useCallback(() => {
+    UR_NUMBERS.forEach((urNumber) => {
+      syncUrButtonFromEnergyState(urNumber)
+    })
+  }, [syncUrButtonFromEnergyState])
+
   useEffect(() => {
     syncEnergyIcons()
-  }, [syncEnergyIcons, semEnergiaPorUr])
+    syncAllUrButtonsFromEnergyState()
+  }, [syncEnergyIcons, syncAllUrButtonsFromEnergyState, semEnergiaPorUr])
+
+  const syncUrActionBindings = useCallback((svg) => {
+    if (!svg) return
+
+    const enabled = interactionModeRef.current === INTERACTION_MODE.ACTION
+
+    bindChaves(svg)
+    bindUrButtons(svg, {
+      enabled,
+      onUrClickRequest: (number, event) => {
+        const group = getUrGroup(svg, number)
+        const status = getUrStatus(group)
+
+        if (status === UR_STATUS.CONNECTING) return
+
+        if (status === UR_STATUS.INACTIVE) {
+          setUrConfirm({
+            number,
+            x: event.clientX,
+            y: event.clientY,
+            action: 'connect',
+          })
+          return
+        }
+
+        setUrConfirm({
+          number,
+          x: event.clientX,
+          y: event.clientY,
+          action: 'disconnect',
+        })
+      },
+    })
+  }, [])
 
   const registerSvg = useCallback((svgElement) => {
     svgRef.current = svgElement
@@ -289,7 +409,10 @@ export function useUrDiagram(interactionMode) {
     syncUrEnergyIcons(svgElement, {
       semEnergiaPorUr: semEnergiaPorUrRef.current,
     })
-  }, [])
+
+    syncAllUrButtonsFromEnergyState()
+    syncUrActionBindings(svgElement)
+  }, [syncAllUrButtonsFromEnergyState, syncUrActionBindings])
 
   const setOnUrClick = useCallback((callback) => {
     onUrClickRef.current = callback
@@ -300,45 +423,15 @@ export function useUrDiagram(interactionMode) {
   }, [])
 
   useEffect(() => {
-    const svg = svgRef.current
-    if (!svg) return
-
-    const enabled = interactionMode === INTERACTION_MODE.ACTION
-
-    bindChaves(svg)
-
-    bindUrButtons(svg, {
-      enabled,
-      onUrClickRequest: (number, event) => {
-        const group = getUrGroup(svg, number)
-        const status = getUrStatus(group)
-
-        if (status === UR_STATUS.CONNECTING) return
-
-        if (status === UR_STATUS.INACTIVE) {
-          setUrConfirm({
-            number,
-            x: event.clientX,
-            y: event.clientY,
-            action: 'connect',
-          })
-          return
-        }
-
-        setUrConfirm({
-          number,
-          x: event.clientX,
-          y: event.clientY,
-          action: 'disconnect',
-        })
-      },
-    })
+    syncUrActionBindings(svgRef.current)
 
     return () => {
-      bindUrButtons(svg, { enabled: false })
-      bindChaves(svg)
+      if (svgRef.current) {
+        bindUrButtons(svgRef.current, { enabled: false })
+        bindChaves(svgRef.current)
+      }
     }
-  }, [interactionMode])
+  }, [interactionMode, syncUrActionBindings])
 
   useEffect(() => {
     const timeouts = connectingTimeoutsRef.current
@@ -388,7 +481,10 @@ export function useUrDiagram(interactionMode) {
 
   const setUrSemEnergia = useCallback(
     (urNumber, type, ativo = true) => {
-      const tipos = new Set(semEnergiaPorUrRef.current.get(urNumber) ?? [])
+      const ur = normalizeUrNumber(urNumber)
+      if (!ur || !UR_ENERGY_TYPES.includes(type)) return
+
+      const tipos = getEnergyTiposForUr(semEnergiaPorUrRef.current, ur)
 
       if (ativo) {
         tipos.add(type)
@@ -396,21 +492,45 @@ export function useUrDiagram(interactionMode) {
         tipos.delete(type)
       }
 
-      if (tipos.size > 0) {
-        semEnergiaPorUrRef.current.set(urNumber, tipos)
-      } else {
-        semEnergiaPorUrRef.current.delete(urNumber)
-      }
-
+      writeEnergyTiposForUr(semEnergiaPorUrRef.current, ur, tipos)
       publishSemEnergia()
+      syncUrButtonFromEnergyState(ur)
     },
-    [publishSemEnergia],
+    [publishSemEnergia, syncUrButtonFromEnergyState],
+  )
+
+  const setUrSemEnergiaBatch = useCallback(
+    (urNumber, energyTypes, ativo = true) => {
+      const ur = normalizeUrNumber(urNumber)
+      if (!ur) return
+
+      const types = (Array.isArray(energyTypes) ? energyTypes : []).filter((type) =>
+        UR_ENERGY_TYPES.includes(type),
+      )
+      if (types.length === 0) return
+
+      const tipos = getEnergyTiposForUr(semEnergiaPorUrRef.current, ur)
+
+      types.forEach((type) => {
+        if (ativo) {
+          tipos.add(type)
+        } else {
+          tipos.delete(type)
+        }
+      })
+
+      writeEnergyTiposForUr(semEnergiaPorUrRef.current, ur, tipos)
+      publishSemEnergia()
+      syncUrButtonFromEnergyState(ur)
+    },
+    [publishSemEnergia, syncUrButtonFromEnergyState],
   )
 
   const clearAllUrSemEnergia = useCallback(() => {
     semEnergiaPorUrRef.current.clear()
     publishSemEnergia()
-  }, [publishSemEnergia])
+    syncAllUrButtonsFromEnergyState()
+  }, [publishSemEnergia, syncAllUrButtonsFromEnergyState])
 
   const syncUrFallsFromFibers = useCallback(
     (vermelhos, urRules = []) => {
@@ -424,7 +544,6 @@ export function useUrDiagram(interactionMode) {
 
         applyUrActive(svgRef.current, urNumber, true)
         activeUrsRef.current.add(urNumber)
-        setUrSemEnergia(urNumber, UR_ENERGY_TYPE.FALTA_1, false)
         ursCaidasPorFibraRef.current.delete(urNumber)
       })
 
@@ -433,11 +552,10 @@ export function useUrDiagram(interactionMode) {
 
         applyUrStatus(svgRef.current, urNumber, UR_STATUS.INACTIVE)
         activeUrsRef.current.delete(urNumber)
-        setUrSemEnergia(urNumber, UR_ENERGY_TYPE.FALTA_1, true)
         ursCaidasPorFibraRef.current.add(urNumber)
       })
     },
-    [setUrSemEnergia],
+    [],
   )
 
   const clearUrFallsFromFiberSimulation = useCallback(() => {
@@ -446,11 +564,23 @@ export function useUrDiagram(interactionMode) {
     ursCaidasPorFibraRef.current.forEach((urNumber) => {
       applyUrActive(svgRef.current, urNumber, true)
       activeUrsRef.current.add(urNumber)
-      setUrSemEnergia(urNumber, UR_ENERGY_TYPE.FALTA_1, false)
     })
 
     ursCaidasPorFibraRef.current.clear()
-  }, [setUrSemEnergia])
+  }, [])
+
+  const fallUrsFromFiber = useCallback((urNumbers = []) => {
+    if (!svgRef.current) return
+
+    urNumbers.forEach((urNumber) => {
+      const ur = Number(urNumber)
+      if (!Number.isFinite(ur)) return
+
+      applyUrStatus(svgRef.current, ur, UR_STATUS.INACTIVE)
+      activeUrsRef.current.delete(ur)
+      ursCaidasPorFibraRef.current.add(ur)
+    })
+  }, [])
 
   return {
     registerSvg,
@@ -468,8 +598,10 @@ export function useUrDiagram(interactionMode) {
     getUprightChaves: () => [...uprightChavesRef.current],
     semEnergiaPorUr,
     setUrSemEnergia,
+    setUrSemEnergiaBatch,
     clearAllUrSemEnergia,
     syncUrFallsFromFibers,
     clearUrFallsFromFiberSimulation,
+    fallUrsFromFiber,
   }
 }

@@ -54,6 +54,19 @@ export function normalizeFiberId(id) {
   return id.startsWith('#') ? id.slice(1) : id
 }
 
+/** Garante id no formato `cabo-N` (aceita `37`, `cabo-37`, `#cabo-37`). */
+export function normalizeCableId(id) {
+  const raw = normalizeFiberId(id).trim()
+  if (!raw) return ''
+  if (FIBER_ID_PATTERN.test(raw)) return raw
+  if (/^\d+$/.test(raw)) return `cabo-${raw}`
+  return raw
+}
+
+export function normalizeCableIds(ids) {
+  return [...new Set((Array.isArray(ids) ? ids : [ids]).map(normalizeCableId).filter(Boolean))]
+}
+
 export function resolveFiberColor({ color, status } = {}) {
   if (color) return color
   if (status && FIBER_STATUS_COLORS[status]) return FIBER_STATUS_COLORS[status]
@@ -61,7 +74,7 @@ export function resolveFiberColor({ color, status } = {}) {
 }
 
 function getFiberElement(svgRoot, fiberId) {
-  const id = normalizeFiberId(fiberId)
+  const id = normalizeCableId(fiberId)
   const scope =
     svgRoot instanceof SVGSVGElement ? svgRoot : svgRoot.querySelector('svg')
   if (!scope) return null

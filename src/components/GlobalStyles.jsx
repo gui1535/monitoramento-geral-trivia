@@ -1,5 +1,4 @@
 import { FIBER_FALLEN_COLOR } from '../fibers/fibers'
-import { UR_ENERGY_ICON_COLOR } from '../urs/urEnergyIcon'
 import { LED_NOT_OK_FILL, LED_NOT_OK_FILL_BRIGHT } from '../leds/leds'
 import { RADIO_OK_COLOR } from '../radios/radios'
 import { colors } from '../styles/tokens'
@@ -57,10 +56,8 @@ const globalCss = `
     user-select: none;
   }
 
-  .ur-icon-energia text {
-    fill: ${UR_ENERGY_ICON_COLOR};
-    font-family: system-ui, 'Segoe UI', sans-serif;
-    font-weight: 700;
+  .ur-icon-energia image {
+    pointer-events: none;
   }
 
   .equipamento-sem-comunicacao {
@@ -92,9 +89,52 @@ const globalCss = `
     filter: none !important;
   }
 
+  @keyframes monitoramento-radio-instavel {
+    0%, 100% {
+      stroke-opacity: 1;
+      opacity: 1;
+    }
+    50% {
+      stroke-opacity: 0.35;
+      opacity: 0.55;
+    }
+  }
+
+  path.radio-instavel[id^="radio-"] {
+    stroke: #e65100 !important;
+    stroke-width: 3px !important;
+    animation: monitoramento-radio-instavel 0.85s ease-in-out infinite;
+  }
+
+  path.radio-instavel[id^="texto-torre-"] {
+    fill: #e65100 !important;
+    animation: monitoramento-radio-instavel 0.85s ease-in-out infinite;
+  }
+
+  .radio-instavel[id^="img-torre-"] {
+    animation: monitoramento-radio-instavel 0.85s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(230, 81, 0, 0.85))
+      sepia(0.4) saturate(2.5) brightness(1.05);
+  }
+
   .antena-funcionando {
     filter: drop-shadow(0 0 8px rgba(${radioOkRgb}, 0.85))
       sepia(0.35) hue-rotate(55deg) saturate(2.8) brightness(1.05);
+  }
+
+  /* Modo Ação: só btn-ur recebe clique; cabos e demais elementos ficam passivos. */
+  svg.monitoramento-modo-acao * {
+    pointer-events: none !important;
+  }
+
+  svg.monitoramento-modo-acao [id^="btn-ur-"] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  svg.monitoramento-modo-acao [id^="btn-ur-"] rect {
+    pointer-events: auto !important;
+    cursor: pointer !important;
   }
 `
 

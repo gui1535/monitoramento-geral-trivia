@@ -4,11 +4,16 @@ import {
   UR_ENERGY_TYPES,
 } from './urEnergyIcon.constants'
 import { getUrGroup, UR_NUMBERS } from './urs'
+import iconEnergiaUrl from '../../assets/icon_energia.png?url'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
+const XLINK_NS = 'http://www.w3.org/1999/xlink'
 const ENERGIA_LAYER_ID = 'monitoramento-ur-energia'
 const ICON_ID_PREFIX = 'ur-energia-'
 
+export const UR_ENERGY_ICON_URL = iconEnergiaUrl
+
+/** @deprecated use UR_ENERGY_ICON_URL — mantido para referências legadas. */
 export const UR_ENERGY_LETTER = 'E'
 
 export const UR_ENERGY_REFERENCE_UR = 2
@@ -64,16 +69,14 @@ function applyIconTransform(group, position) {
   group.setAttribute('transform', `translate(${dx} ${y})`)
 }
 
-function applyLetterStyle(text, layout) {
-  const fontSize = Math.round(layout.height * 0.78)
-  text.setAttribute('x', String(layout.width / 2))
-  text.setAttribute('y', String(layout.height / 2))
-  text.setAttribute('text-anchor', 'middle')
-  text.setAttribute('dominant-baseline', 'middle')
-  text.setAttribute('fill', UR_ENERGY_ICON_COLOR)
-  text.setAttribute('font-size', String(fontSize))
-  text.setAttribute('font-weight', '700')
-  text.setAttribute('font-family', "system-ui, 'Segoe UI', sans-serif")
+function applyImageStyle(image, layout) {
+  image.setAttribute('x', '0')
+  image.setAttribute('y', '0')
+  image.setAttribute('width', String(layout.width))
+  image.setAttribute('height', String(layout.height))
+  image.setAttribute('href', UR_ENERGY_ICON_URL)
+  image.setAttributeNS(XLINK_NS, 'href', UR_ENERGY_ICON_URL)
+  image.setAttribute('preserveAspectRatio', 'xMidYMid meet')
 }
 
 function createEnergyIconElement(urNumber, type, position) {
@@ -82,19 +85,21 @@ function createEnergyIconElement(urNumber, type, position) {
   group.classList.add(UR_ENERGY_ICON_CLASS, `${UR_ENERGY_ICON_CLASS}-${type}`)
   applyIconTransform(group, position)
 
-  const text = document.createElementNS(SVG_NS, 'text')
-  text.textContent = UR_ENERGY_LETTER
-  applyLetterStyle(text, position.layout)
-  group.appendChild(text)
+  const image = document.createElementNS(SVG_NS, 'image')
+  applyImageStyle(image, position.layout)
+  group.appendChild(image)
   return group
 }
 
 function updateEnergyIconElement(element, position) {
   applyIconTransform(element, position)
-  const text = element.querySelector('text')
-  if (text) {
-    applyLetterStyle(text, position.layout)
+  let image = element.querySelector('image')
+  if (!image) {
+    element.querySelectorAll('text').forEach((node) => node.remove())
+    image = document.createElementNS(SVG_NS, 'image')
+    element.appendChild(image)
   }
+  applyImageStyle(image, position.layout)
   element.style.display = ''
   element.style.visibility = 'visible'
 }

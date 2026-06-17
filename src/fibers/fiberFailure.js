@@ -1,4 +1,4 @@
-import { FIBER_STATUS, FIBER_STATUS_COLORS, normalizeFiberId } from './fibers'
+import { FIBER_STATUS, FIBER_STATUS_COLORS, normalizeCableId } from './fibers'
 
 export const FIBER_FALL_CLASS = 'fibra-caida'
 export const FIBER_REAL_FALL_CLASS = 'fibra-queda-real'
@@ -59,7 +59,7 @@ export function applyFiberFailureVisual(svgRoot, { cabos = [], nodes = [] } = {}
   if (!svgRoot) return
 
   cabos.forEach((fiberId) => {
-    const element = getElementById(svgRoot, normalizeFiberId(fiberId))
+    const element = getElementById(svgRoot, normalizeCableId(fiberId))
     if (!element) return
 
     if (!element.dataset.originalStroke) {

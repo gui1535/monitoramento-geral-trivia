@@ -314,6 +314,53 @@ export function buildCaminhoVoltaParaRepintura(raiz, caboFim, network, cabosJaEm
   return buildCaminhoVoltaCompleto(raiz, caboFim, network, cabosJaEmErro)
 }
 
+/** Caminho de ida (BFS) da origem da queda até o cabo `fim`. */
+export function buildCaminhoIdaAteFim(raiz, caboFim, network) {
+  if (!raiz || !network) return []
+  if (!caboFim) return [raiz]
+  if (raiz === caboFim) return [raiz]
+
+  const parent = new Map()
+  const processados = new Set([raiz])
+  const fila = [raiz]
+
+  while (fila.length > 0) {
+    const caboId = fila.shift()
+    if (caboId === caboFim) {
+      const caminho = []
+      let current = caboFim
+      while (current) {
+        caminho.unshift(current)
+        current = parent.get(current)
+      }
+      return caminho
+    }
+
+    const link = getNetworkLink(network, caboId)
+    if (!link || link.fim) continue
+
+    const afetadosCabos = new Set()
+    const afetadosNodes = new Set()
+    const proximaOnda = coletarProximaOnda(
+      link,
+      network,
+      processados,
+      afetadosCabos,
+      afetadosNodes,
+    )
+
+    proximaOnda.forEach((proximoId) => {
+      if (!processados.has(proximoId)) {
+        processados.add(proximoId)
+        parent.set(proximoId, caboId)
+        fila.push(proximoId)
+      }
+    })
+  }
+
+  return [raiz]
+}
+
 function buildOrdemVolta(ordemCascata, network) {
   const raiz = ordemCascata[0]
   const indiceFim = ordemCascata.findIndex(

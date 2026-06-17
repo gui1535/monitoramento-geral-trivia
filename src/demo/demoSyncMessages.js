@@ -1,8 +1,13 @@
+import { normalizeCableIds } from '../fibers/fibers'
+
 export const DEMO_SYNC_TYPE = {
   FIBER_DROP: 'fiber_drop',
   CLEAR_SIMULATION: 'clear_simulation',
+  FIXED_SIMULATION: 'fixed_simulation',
   UR_SEM_ENERGIA: 'ur_sem_energia',
+  UR_SEM_ENERGIA_BATCH: 'ur_sem_energia_batch',
   CLEAR_UR_SEM_ENERGIA: 'clear_ur_sem_energia',
+  RADIO_UNSTABLE: 'radio_unstable',
 }
 
 export function normalizeRoomCode(code) {
@@ -32,7 +37,7 @@ export function generateRoomCode(length = 6) {
 export function createFiberDropMessage(caboIds) {
   return {
     type: DEMO_SYNC_TYPE.FIBER_DROP,
-    caboIds: Array.isArray(caboIds) ? caboIds : [caboIds],
+    caboIds: normalizeCableIds(caboIds),
   }
 }
 
@@ -40,11 +45,27 @@ export function createClearSimulationMessage() {
   return { type: DEMO_SYNC_TYPE.CLEAR_SIMULATION }
 }
 
+export function createFixedSimulationMessage(scenario) {
+  return {
+    type: DEMO_SYNC_TYPE.FIXED_SIMULATION,
+    scenario: String(scenario ?? ''),
+  }
+}
+
 export function createUrSemEnergiaMessage(ur, energyType, ativo) {
   return {
     type: DEMO_SYNC_TYPE.UR_SEM_ENERGIA,
-    ur,
+    ur: Number(ur),
     energyType,
+    ativo: Boolean(ativo),
+  }
+}
+
+export function createUrSemEnergiaBatchMessage(ur, energyTypes, ativo = true) {
+  return {
+    type: DEMO_SYNC_TYPE.UR_SEM_ENERGIA_BATCH,
+    ur: Number(ur),
+    energyTypes: Array.isArray(energyTypes) ? energyTypes : [],
     ativo: Boolean(ativo),
   }
 }
@@ -53,21 +74,42 @@ export function createClearUrSemEnergiaMessage() {
   return { type: DEMO_SYNC_TYPE.CLEAR_UR_SEM_ENERGIA }
 }
 
+export function createRadioUnstableMessage() {
+  return { type: DEMO_SYNC_TYPE.RADIO_UNSTABLE }
+}
+
 export function applyDemoSyncMessage(message, handlers = {}) {
   if (!message?.type) return
 
   switch (message.type) {
     case DEMO_SYNC_TYPE.FIBER_DROP:
-      handlers.onFiberDrop?.(message.caboIds ?? [])
+      handlers.onFiberDrop?.(normalizeCableIds(message.caboIds ?? []))
       break
     case DEMO_SYNC_TYPE.CLEAR_SIMULATION:
       handlers.onClearSimulation?.()
       break
+    case DEMO_SYNC_TYPE.FIXED_SIMULATION:
+      handlers.onFixedSimulation?.(message.scenario)
+      break
     case DEMO_SYNC_TYPE.UR_SEM_ENERGIA:
-      handlers.onUrSemEnergia?.(message.ur, message.energyType, message.ativo)
+      handlers.onUrSemEnergia?.(
+        Number(message.ur),
+        message.energyType,
+        message.ativo,
+      )
+      break
+    case DEMO_SYNC_TYPE.UR_SEM_ENERGIA_BATCH:
+      handlers.onUrSemEnergiaBatch?.(
+        Number(message.ur),
+        message.energyTypes ?? [],
+        message.ativo,
+      )
       break
     case DEMO_SYNC_TYPE.CLEAR_UR_SEM_ENERGIA:
       handlers.onClearUrSemEnergia?.()
+      break
+    case DEMO_SYNC_TYPE.RADIO_UNSTABLE:
+      handlers.onRadioUnstable?.()
       break
     default:
       break

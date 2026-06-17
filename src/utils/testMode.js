@@ -1,7 +1,10 @@
-/** Ative no console: localStorage.setItem('teste:1', '1') */
+export const TEST_MODE_STORAGE_KEY = 'teste:1'
+
 export function isTestModeEnabled() {
+  if (typeof window === 'undefined') return false
+
   try {
-    return localStorage.getItem('teste:1') === '1'
+    return window.localStorage.getItem(TEST_MODE_STORAGE_KEY) === '1'
   } catch {
     return false
   }

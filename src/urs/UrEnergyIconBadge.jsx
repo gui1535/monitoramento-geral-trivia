@@ -1,18 +1,14 @@
-import { UR_ENERGY_ICON_COLOR, UR_ENERGY_LETTER } from './urEnergyIcon'
+import { UR_ENERGY_ICON_URL } from './urEnergyIcon'
 
 export function UrEnergyIconBadge({ size = 18 }) {
   return (
-    <span
-      style={{
-        color: UR_ENERGY_ICON_COLOR,
-        fontSize: size,
-        fontWeight: 700,
-        lineHeight: 1,
-        fontFamily: "system-ui, 'Segoe UI', sans-serif",
-      }}
+    <img
+      src={UR_ENERGY_ICON_URL}
+      alt=""
+      width={size}
+      height={size}
+      style={{ display: 'block' }}
       aria-hidden
-    >
-      {UR_ENERGY_LETTER}
-    </span>
+    />
   )
 }

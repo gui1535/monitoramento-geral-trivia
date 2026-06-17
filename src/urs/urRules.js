@@ -2,6 +2,55 @@ import { UR_NUMBERS } from './urs'
 
 export const UR_CABLE_ID_PATTERN = /^cabo-ur-\d+$/
 
+/** Padrão operacional: grupos de UR → cabos que, ao caírem, derrubam o btn-ur. */
+export const UR_FALL_PATTERN = [
+  { urs: [2, 3], cabos: [54, 55] },
+  { urs: [4, 5], cabos: [55, 56] },
+  { urs: [6, 7], cabos: [57, 58] },
+  { urs: [10, 11], cabos: [60, 61] },
+  { urs: [12, 13, 14], cabos: [62, 63] },
+  { urs: [15, 16], cabos: [63, 64] },
+  { urs: [18, 19], cabos: [76, 33] },
+  { urs: [20, 21], cabos: [33, 32] },
+  { urs: [28, 29], cabos: [40, 41] },
+  { urs: [30, 31, 32], cabos: [42, 43] },
+  { urs: [33, 34], cabos: [43, 44] },
+  { urs: [35, 36], cabos: [44, 45] },
+  { urs: [37, 38], cabos: [47, 48] },
+  { urs: [39], cabos: [48] },
+]
+
+export function buildUrRulesFromPattern() {
+  const byUr = new Map()
+
+  UR_FALL_PATTERN.forEach(({ urs, cabos }) => {
+    const caboIds = cabos.map((n) => `cabo-${n}`)
+    const min = caboIds.length
+
+    urs.forEach((ur) => {
+      byUr.set(ur, {
+        ur,
+        habilitado: true,
+        minCabosVermelhos: min,
+        cabos: [...caboIds],
+      })
+    })
+  })
+
+  UR_NUMBERS.forEach((ur) => {
+    if (!byUr.has(ur)) {
+      byUr.set(ur, {
+        ur,
+        habilitado: false,
+        minCabosVermelhos: 2,
+        cabos: [],
+      })
+    }
+  })
+
+  return [...byUr.values()].sort((a, b) => a.ur - b.ur)
+}
+
 export function getUrCableId(urNumber) {
   return `cabo-ur-${urNumber}`
 }
@@ -42,6 +91,10 @@ export function createDefaultUrRule(urNumber, availableCableIds = []) {
 
 export function normalizeUrRules(rawRules, urCableIds = []) {
   const byUr = new Map()
+
+  buildUrRulesFromPattern().forEach((rule) => {
+    byUr.set(rule.ur, { ...rule })
+  })
 
   if (Array.isArray(rawRules)) {
     rawRules.forEach((rule) => {
@@ -104,10 +157,12 @@ export function salvarConfiguracaoUr(urNumber, dadosNovos, network) {
 
   const rules = Array.isArray(network.urRules) ? [...network.urRules] : []
   const index = rules.findIndex((rule) => rule.ur === ur)
+  const patternRule = buildUrRulesFromPattern().find((rule) => rule.ur === ur)
   const base =
     index >= 0
       ? rules[index]
-      : createDefaultUrRule(ur, extractUrCableIdsFromNetwork(network))
+      : (patternRule ??
+        createDefaultUrRule(ur, extractUrCableIdsFromNetwork(network)))
 
   const nextRule = {
     ...base,

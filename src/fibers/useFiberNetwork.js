@@ -8,7 +8,7 @@ import {
   collectFibersRealFall,
 } from './fiberFailure'
 import { applyFiberFailureInstant } from './cascadeAnimation'
-import { extractFiberIdsFromSvg } from './fibers'
+import { extractFiberIdsFromSvg, normalizeCableIds } from './fibers'
 import {
   createEmptyNetwork,
   exportFiberNetwork,
@@ -101,7 +101,7 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
 
   const simulateDrop = useCallback(
     (caboIds, options = {}) => {
-      const ids = (Array.isArray(caboIds) ? caboIds : [caboIds]).filter(Boolean)
+      const ids = normalizeCableIds(caboIds)
       const svg = getSvg()
       if (!svg || ids.length === 0) return { cabos: [], nodes: [], ordem: [] }
 
@@ -109,7 +109,9 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
 
       ids.forEach((caboId) => {
         const resultado = getAfetadosMultiplos([caboId], network)
-        lastResultado = resultado
+        const ordem =
+          resultado.ordem?.length > 0 ? resultado.ordem : [caboId]
+        lastResultado = { ...resultado, ordem }
 
         const cabosJaEmErro = [
           ...new Set([
@@ -120,7 +122,7 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
 
         applyFiberFailureInstant(
           svg,
-          { ...resultado, raiz: caboId },
+          { ...resultado, ordem, raiz: caboId },
           {
             network,
             cabosJaEmErro,

@@ -2,9 +2,11 @@ import {
   applyFiberUpdate,
   FIBER_STATUS,
   FIBER_STATUS_COLORS,
-  normalizeFiberId,
+  normalizeCableId,
+  normalizeCableIds,
 } from './fibers'
 import {
+  buildCaminhoIdaAteFim,
   buildCaminhoVoltaCompleto,
   buildCaminhoVoltaParaRepintura,
   getNetworkLink,
@@ -17,7 +19,7 @@ import {
 } from './fiberFailure'
 
 function getFiberElement(svgRoot, fiberId) {
-  const id = normalizeFiberId(fiberId)
+  const id = normalizeCableId(fiberId)
   const scope =
     svgRoot instanceof SVGSVGElement ? svgRoot : svgRoot?.querySelector('svg')
   if (!scope || !id) return null
@@ -68,9 +70,30 @@ export function paintFiberActive(svgRoot, fiberId) {
   const element = getFiberElement(svgRoot, fiberId)
   if (element) {
     element.classList.remove(FIBER_FALL_CLASS, FIBER_REAL_FALL_CLASS)
+    element.style.removeProperty('stroke-opacity')
+    element.removeAttribute('stroke-opacity')
   }
 
   applyFiberUpdate(svgRoot, { id: fiberId, status: FIBER_STATUS.ACTIVE })
+}
+
+/** Cor original do SVG — nem vermelho nem verde de simulação. */
+export function paintFiberNormal(svgRoot, fiberId) {
+  const element = getFiberElement(svgRoot, fiberId)
+  if (!element) return
+
+  storeOriginalStroke(element)
+  element.classList.remove(FIBER_FALL_CLASS, FIBER_REAL_FALL_CLASS)
+  element.style.removeProperty('stroke-opacity')
+  element.removeAttribute('stroke-opacity')
+
+  const original = element.dataset.originalStroke
+  if (original) {
+    element.setAttribute('stroke', original)
+    element.style.setProperty('stroke', original, 'important')
+  } else {
+    applyFiberUpdate(svgRoot, { id: fiberId, status: FIBER_STATUS.NORMAL })
+  }
 }
 
 function getCaminhoVoltaFallback(ordem, ordemVolta, raiz) {
@@ -105,11 +128,9 @@ export function resolveCabosVermelhos(
   const ordem = resultado.ordem ?? []
   const raiz = resultado.raiz
   const caboFim = resultado.caboFim
-  const errosAnteriores = new Set(cabosJaEmErro)
-  const realmenteCaidos = new Set([
-    ...errosAnteriores,
-    ...cabosQueda.filter(Boolean),
-  ])
+  const errosAnteriores = new Set(normalizeCableIds(cabosJaEmErro))
+  const quedaNormalizada = normalizeCableIds(cabosQueda)
+  const realmenteCaidos = new Set([...errosAnteriores, ...quedaNormalizada])
   const vermelhos = new Set()
   const primeiraQueda = errosAnteriores.size === 0
 
@@ -119,20 +140,25 @@ export function resolveCabosVermelhos(
       : getCaminhoVoltaFallback(ordem, resultado.ordemVolta ?? [], raiz)
 
   if (primeiraQueda) {
-    // Primeira queda: ida até o fim em vermelho; retorno (volta) em verde.
-    ordem.forEach((id) => vermelhos.add(id))
-
+    // Primeira queda: só o caminho de ida até o fim fica vermelho; demais ramos da cascata ficam verdes.
     if (network && raiz && caboFim) {
-      buildCaminhoVoltaParaRepintura(raiz, caboFim, network, []).forEach((id) => {
-        if (id !== raiz) vermelhos.delete(id)
+      buildCaminhoIdaAteFim(raiz, caboFim, network).forEach((id) => {
+        vermelhos.add(id)
       })
+    } else {
+      ordem.forEach((id) => vermelhos.add(id))
     }
+
+    quedaNormalizada.forEach((id) => {
+      vermelhos.add(id)
+      realmenteCaidos.add(id)
+    })
   } else {
     // Queda subsequente: trecho de volta até cabo já caído; ida à frente da raiz fica verde.
-    if (raiz) vermelhos.add(raiz)
+    if (raiz) vermelhos.add(normalizeCableId(raiz))
 
     if (raiz && network) {
-      getLinkVolta(getNetworkLink(network, raiz)).forEach((id) => {
+      getLinkVolta(getNetworkLink(network, normalizeCableId(raiz))).forEach((id) => {
         if (id && id !== raiz) vermelhos.add(id)
       })
     }
@@ -144,7 +170,12 @@ export function resolveCabosVermelhos(
       for (let j = 0; j <= i; j++) vermelhos.add(caminhoVolta[j])
     })
 
-    preencherTrechoVermelhoVolta(vermelhos, raiz, caminhoVolta)
+    preencherTrechoVermelhoVolta(vermelhos, normalizeCableId(raiz), caminhoVolta)
+
+    quedaNormalizada.forEach((id) => {
+      vermelhos.add(id)
+      realmenteCaidos.add(id)
+    })
   }
 
   const caboIdentificado =
@@ -176,8 +207,16 @@ export function applyFiberFailureInstant(svgRoot, resultado, options = {}) {
   const raiz = resultado.raiz
   const caboFim = resultado.caboFim
 
+  const quedaNormalizada = normalizeCableIds(cabosQueda)
+  const raizNormalizada = normalizeCableId(raiz)
+
   const { cabosVermelhos, cabosRealmenteCaidos, caminhoVolta } =
-    resolveCabosVermelhos(resultado, cabosJaEmErro, network, cabosQueda)
+    resolveCabosVermelhos(
+      { ...resultado, raiz: raizNormalizada || raiz },
+      cabosJaEmErro,
+      network,
+      quedaNormalizada,
+    )
 
   if (!svgRoot) {
     onComplete?.([...cabosVermelhos], [...cabosRealmenteCaidos])
@@ -203,6 +242,7 @@ export function applyFiberFailureInstant(svgRoot, resultado, options = {}) {
     ...caminhoVolta,
     ...voltaParaRepintura,
     ...cabosVermelhos,
+    ...quedaNormalizada,
   ])
 
   afetados.forEach((fiberId) => {
@@ -215,6 +255,140 @@ export function applyFiberFailureInstant(svgRoot, resultado, options = {}) {
     }
   })
 
+  quedaNormalizada.forEach((fiberId) => {
+    paintFiberRealFall(svgRoot, fiberId)
+  })
+
   onComplete?.([...cabosVermelhos], [...cabosRealmenteCaidos])
   return () => {}
+}
+
+/** Intervalo entre cada cabo na simulação de cascata (ida e volta). */
+export const CASCADE_STEP_MS = 120
+
+/**
+ * Anima queda em cascata: ida vermelha até o fim, rádios ao chegar, volta verde até a origem.
+ */
+export function runCascadeSimulation(svgRoot, resultado, options = {}) {
+  const {
+    intervalMs = CASCADE_STEP_MS,
+    onComplete,
+    onReachFim,
+    cabosJaEmErro = [],
+    quedaReal = [],
+  } = options
+
+  const ordemIda = normalizeCableIds(resultado.ordem ?? [])
+  const ordemVolta = normalizeCableIds(resultado.ordemVolta ?? [])
+  const raiz = normalizeCableId(resultado.raiz)
+  const caboFim = normalizeCableId(resultado.caboFim)
+  const quedaRealSet = new Set(normalizeCableIds(quedaReal))
+
+  if (!svgRoot || ordemIda.length === 0) {
+    onComplete?.(normalizeCableIds(cabosJaEmErro), [...quedaRealSet])
+    return () => {}
+  }
+
+  let cancelled = false
+  let timerId = null
+  const errosAnteriores = new Set(normalizeCableIds(cabosJaEmErro))
+  const cabosVermelhos = new Set(errosAnteriores)
+
+  errosAnteriores.forEach((fiberId) => paintFiberAlert(svgRoot, fiberId))
+
+  function syncTodosVermelhos() {
+    cabosVermelhos.forEach((fiberId) => {
+      paintFiberAlert(svgRoot, fiberId)
+    })
+  }
+
+  function marcarVermelho(fiberId) {
+    const id = normalizeCableId(fiberId)
+    if (!id) return
+
+    cabosVermelhos.add(id)
+    paintFiberAlert(svgRoot, id)
+  }
+
+  function marcarVerde(fiberId) {
+    const id = normalizeCableId(fiberId)
+    if (!id || errosAnteriores.has(id) || id === raiz) return
+
+    cabosVermelhos.delete(id)
+    paintFiberActive(svgRoot, id)
+  }
+
+  function finalize() {
+    ordemIda.forEach((fiberId) => {
+      if (fiberId !== raiz) marcarVerde(fiberId)
+    })
+
+    cabosVermelhos.clear()
+    errosAnteriores.forEach((fiberId) => cabosVermelhos.add(fiberId))
+
+    if (raiz) {
+      cabosVermelhos.add(raiz)
+      if (quedaRealSet.has(raiz)) {
+        paintFiberRealFall(svgRoot, raiz)
+      } else {
+        paintFiberAlert(svgRoot, raiz)
+      }
+    }
+
+    quedaRealSet.forEach((fiberId) => {
+      cabosVermelhos.add(fiberId)
+      paintFiberRealFall(svgRoot, fiberId)
+    })
+
+    onComplete?.([...cabosVermelhos], [...quedaRealSet])
+  }
+
+  function startVolta(indexVolta) {
+    if (cancelled) return
+
+    if (indexVolta >= ordemVolta.length) {
+      finalize()
+      return
+    }
+
+    marcarVerde(ordemVolta[indexVolta])
+
+    timerId = window.setTimeout(() => {
+      startVolta(indexVolta + 1)
+    }, intervalMs)
+  }
+
+  function startIda(indexIda) {
+    if (cancelled) return
+
+    if (indexIda >= ordemIda.length) {
+      if (ordemVolta.length > 0) {
+        startVolta(0)
+      } else {
+        finalize()
+      }
+      return
+    }
+
+    const fiberId = ordemIda[indexIda]
+    marcarVermelho(fiberId)
+
+    if (caboFim && fiberId === caboFim) {
+      onReachFim?.({
+        caboFim,
+        radios: resultado.radiosEvidentes,
+      })
+    }
+
+    timerId = window.setTimeout(() => {
+      startIda(indexIda + 1)
+    }, intervalMs)
+  }
+
+  startIda(0)
+
+  return () => {
+    cancelled = true
+    if (timerId) window.clearTimeout(timerId)
+  }
 }
