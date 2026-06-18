@@ -4,7 +4,11 @@ import {
   DEMO_PRESETS,
   runDemoPreset,
 } from '../demo/demoPresets'
-import { generateRoomCode, isValidRoomCode } from '../demo/demoSyncMessages'
+import {
+  createClearAllMessage,
+  generateRoomCode,
+  isValidRoomCode,
+} from '../demo/demoSyncMessages'
 import { DEMO_PEER_STATUS } from '../demo/useDemoPeerSync'
 import { colors } from '../styles/tokens'
 
@@ -125,6 +129,13 @@ const secondaryBtnStyle = {
   border: `1px solid ${colors.border}`,
 }
 
+const actionsStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 10,
+  marginTop: 6,
+}
+
 const footerStyle = {
   padding: '12px 20px 24px',
   borderTop: `1px solid ${colors.border}`,
@@ -224,10 +235,19 @@ function JoinView({ sync }) {
 function ControllerView({ sync, onSend }) {
   const [lastAction, setLastAction] = useState(null)
 
+  function notifyAction(label) {
+    setLastAction(label)
+    window.setTimeout(() => setLastAction(null), 2000)
+  }
+
   function handleRun(preset) {
     runDemoPreset(preset, onSend)
-    setLastAction(preset.label)
-    window.setTimeout(() => setLastAction(null), 2000)
+    notifyAction(preset.label)
+  }
+
+  function handleClearAll() {
+    onSend(createClearAllMessage())
+    notifyAction('Limpar tudo')
   }
 
   return (
@@ -242,9 +262,15 @@ function ControllerView({ sync, onSend }) {
         ))}
       </div>
 
-      <button type="button" style={secondaryBtnStyle} onClick={sync.disconnect}>
-        Desconectar
-      </button>
+      <div style={actionsStyle}>
+        <button type="button" style={secondaryBtnStyle} onClick={sync.disconnect}>
+          Desconectar
+        </button>
+
+        <button type="button" style={primaryBtnStyle} onClick={handleClearAll}>
+          Limpar tudo
+        </button>
+      </div>
     </>
   )
 }

@@ -165,6 +165,28 @@ export function MonitoramentoPage() {
     })
   }, [radioDiagram])
 
+  const { entries: monitoringErrors, clearLog } = useMonitoringErrorLog({
+    saveError: fiberNetwork.saveError,
+    radioAlert,
+    failureCabos:
+      fixedFailureCabos.length > 0
+        ? fixedFailureCabos
+        : fiberNetwork.activeFailure.cabos,
+    semEnergiaPorUr: urDiagram.semEnergiaPorUr,
+  })
+
+  const applyClearAll = useCallback(() => {
+    clearLog()
+    fiberNetwork.clearSaveError()
+    applyClearFiberSimulation()
+    applyClearUrSemEnergia()
+  }, [
+    clearLog,
+    fiberNetwork,
+    applyClearFiberSimulation,
+    applyClearUrSemEnergia,
+  ])
+
   const handleRemoteDemoMessage = useCallback(
     (message) => {
       applyDemoSyncMessage(message, {
@@ -175,6 +197,7 @@ export function MonitoramentoPage() {
         onUrSemEnergiaBatch: applySetUrSemEnergiaBatch,
         onClearUrSemEnergia: applyClearUrSemEnergia,
         onRadioUnstable: applyRadioUnstable,
+        onClearAll: applyClearAll,
       })
     },
     [
@@ -185,6 +208,7 @@ export function MonitoramentoPage() {
       applySetUrSemEnergiaBatch,
       applyClearUrSemEnergia,
       applyRadioUnstable,
+      applyClearAll,
     ],
   )
 
@@ -206,10 +230,6 @@ export function MonitoramentoPage() {
     applyClearFiberSimulation()
   }, [applyClearFiberSimulation, isDemoGuest, demoSend])
 
-  const dismissRadioAlert = useCallback(() => {
-    setRadioAlert(null)
-  }, [])
-
   const handleClearUrSemEnergia = useCallback(() => {
     if (isDemoGuest) {
       demoSend(createClearUrSemEnergiaMessage())
@@ -218,29 +238,9 @@ export function MonitoramentoPage() {
     applyClearUrSemEnergia()
   }, [applyClearUrSemEnergia, isDemoGuest, demoSend])
 
-  const { entries: monitoringErrors, clearLog } = useMonitoringErrorLog({
-    saveError: fiberNetwork.saveError,
-    radioAlert,
-    failureCabos:
-      fixedFailureCabos.length > 0
-        ? fixedFailureCabos
-        : fiberNetwork.activeFailure.cabos,
-    semEnergiaPorUr: urDiagram.semEnergiaPorUr,
-  })
-
   const handleClearAllErrors = useCallback(() => {
-    clearLog()
-    dismissRadioAlert()
-    fiberNetwork.clearSaveError()
-    handleClearFiberSimulation()
-    handleClearUrSemEnergia()
-  }, [
-    clearLog,
-    dismissRadioAlert,
-    fiberNetwork,
-    handleClearFiberSimulation,
-    handleClearUrSemEnergia,
-  ])
+    applyClearAll()
+  }, [applyClearAll])
 
   const handleLegendExpandedChange = useCallback((expanded) => {
     setLegendOpen(expanded)

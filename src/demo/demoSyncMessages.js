@@ -8,6 +8,7 @@ export const DEMO_SYNC_TYPE = {
   UR_SEM_ENERGIA_BATCH: 'ur_sem_energia_batch',
   CLEAR_UR_SEM_ENERGIA: 'clear_ur_sem_energia',
   RADIO_UNSTABLE: 'radio_unstable',
+  CLEAR_ALL: 'clear_all',
 }
 
 export function normalizeRoomCode(code) {
@@ -78,6 +79,10 @@ export function createRadioUnstableMessage() {
   return { type: DEMO_SYNC_TYPE.RADIO_UNSTABLE }
 }
 
+export function createClearAllMessage() {
+  return { type: DEMO_SYNC_TYPE.CLEAR_ALL }
+}
+
 export function applyDemoSyncMessage(message, handlers = {}) {
   if (!message?.type) return
 
@@ -110,6 +115,9 @@ export function applyDemoSyncMessage(message, handlers = {}) {
       break
     case DEMO_SYNC_TYPE.RADIO_UNSTABLE:
       handlers.onRadioUnstable?.()
+      break
+    case DEMO_SYNC_TYPE.CLEAR_ALL:
+      handlers.onClearAll?.()
       break
     default:
       break
