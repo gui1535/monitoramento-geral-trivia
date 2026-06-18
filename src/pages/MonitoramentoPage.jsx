@@ -1,5 +1,10 @@
 import { useCallback, useRef, useState } from 'react'
 import { DemoToolsStack } from '../components/DemoToolsStack'
+import {
+  MONITORING_LEGEND_COLLAPSED_OFFSET_PX,
+  MONITORING_LEGEND_EXPANDED_OFFSET_PX,
+  MonitoringLegend,
+} from '../components/MonitoringLegend'
 import { DemoMobileScreen } from '../components/DemoMobileScreen'
 import { DemoPeerPanel } from '../components/DemoPeerPanel'
 import { ErrorsPanel } from '../components/ErrorsPanel'
@@ -44,6 +49,7 @@ const bodyStyle = {
 export function MonitoramentoPage() {
   const [isMobileClient] = useState(() => isMobileDevice())
   const [showDemoTools] = useState(() => isTestModeEnabled())
+  const [legendOpen, setLegendOpen] = useState(false)
   const [canvasMode, setCanvasMode] = useState(INTERACTION_MODE.NAVIGATION)
   const [radioAlert, setRadioAlert] = useState(null)
   const [fixedFailureCabos, setFixedFailureCabos] = useState([])
@@ -236,6 +242,14 @@ export function MonitoramentoPage() {
     handleClearUrSemEnergia,
   ])
 
+  const handleLegendExpandedChange = useCallback((expanded) => {
+    setLegendOpen(expanded)
+  }, [])
+
+  const demoToolsTop = legendOpen
+    ? MONITORING_LEGEND_EXPANDED_OFFSET_PX
+    : MONITORING_LEGEND_COLLAPSED_OFFSET_PX
+
   const showMobileControl =
     isMobileClient && demoSync.role !== DEMO_PEER_ROLE.HOST
 
@@ -254,8 +268,11 @@ export function MonitoramentoPage() {
 
         <ErrorsPanel errors={monitoringErrors} onClearAll={handleClearAllErrors} />
 
+        <MonitoringLegend onExpandedChange={handleLegendExpandedChange} />
+
         {showDemoTools ? (
           <DemoToolsStack
+            top={demoToolsTop}
             onApplyMessage={handleRemoteDemoMessage}
             labelsVisible={fiberDiagram.cableIdLabelsVisible}
             onToggleCableIds={() =>

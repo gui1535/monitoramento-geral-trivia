@@ -1,9 +1,9 @@
 import { DemoTestPanel } from './DemoTestPanel'
 import { ShowCableIdsFab } from './ShowCableIdsFab'
 
-const stackStyle = {
+const stackStyle = (top = 16) => ({
   position: 'absolute',
-  top: 16,
+  top,
   right: 16,
   zIndex: 31,
   width: 'min(280px, calc(100vw - 32px))',
@@ -11,15 +11,17 @@ const stackStyle = {
   flexDirection: 'column',
   gap: 8,
   pointerEvents: 'auto',
-}
+})
 
 export function DemoToolsStack({
   onApplyMessage,
   labelsVisible,
   onToggleCableIds,
+  top = 16,
 }) {
   return (
-    <div style={stackStyle} onPointerDown={(e) => e.stopPropagation()}>
+    <div
+      style={stackStyle(top)} onPointerDown={(e) => e.stopPropagation()}>
       <DemoTestPanel onApplyMessage={onApplyMessage} />
       <ShowCableIdsFab
         fullWidth
