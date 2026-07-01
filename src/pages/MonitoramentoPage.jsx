@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { DemoToolsStack } from '../components/DemoToolsStack'
 import {
   MONITORING_LEGEND_COLLAPSED_OFFSET_PX,
@@ -8,6 +8,7 @@ import {
 import { DemoMobileScreen } from '../components/DemoMobileScreen'
 import { DemoPeerPanel } from '../components/DemoPeerPanel'
 import { ErrorsPanel } from '../components/ErrorsPanel'
+import { ReviewPlayer } from '../components/ReviewPlayer'
 import {
   applyDemoSyncMessage,
   createClearSimulationMessage,
@@ -18,6 +19,7 @@ import { DEMO_PEER_ROLE, useDemoPeerSync } from '../demo/useDemoPeerSync'
 import { applyFixedSimulation } from '../demo/fixedSimulation'
 import { applyRadioUnstableSimulation } from '../demo/radioSimulation'
 import { useMonitoringErrorLog } from '../errors/useMonitoringErrorLog'
+import { useMonitoringReview } from '../review/useMonitoringReview'
 import { CanvasModeToolbar } from '../canvas/CanvasModeToolbar'
 import { CanvasViewport } from '../canvas/CanvasViewport'
 import { CanvasWorld } from '../canvas/CanvasWorld'
@@ -27,7 +29,7 @@ import { useFiberNetwork } from '../fibers/useFiberNetwork'
 import { useLedDiagram } from '../leds/leds'
 import { formatRadioFunctioningMessage, useRadioDiagram } from '../radios/radios'
 import { UrConfirmPopup } from '../components/UrConfirmPopup'
-import { useUrDiagram } from '../urs/urs'
+import { useUrDiagram, UR_CONNECT_DELAY_MS } from '../urs/urs'
 import { isMobileDevice } from '../utils/isMobileDevice'
 import { isTestModeEnabled } from '../utils/testMode'
 
@@ -58,6 +60,9 @@ export function MonitoramentoPage() {
     rightSide: false,
     cancelCascade: null,
   })
+  const monitoringErrorsRef = useRef([])
+  const recordFrameRef = useRef(() => {})
+  const svgReadyRef = useRef(false)
 
   const fiberDiagram = useFiberDiagram()
   const ledDiagram = useLedDiagram()
@@ -71,6 +76,67 @@ export function MonitoramentoPage() {
     configMode: INTERACTION_MODE.FIBER_CONFIG,
   })
 
+  const { entries: monitoringErrors, clearLog } = useMonitoringErrorLog({
+    saveError: fiberNetwork.saveError,
+    radioAlert,
+    failureCabos:
+      fixedFailureCabos.length > 0
+        ? fixedFailureCabos
+        : fiberNetwork.activeFailure.cabos,
+    semEnergiaPorUr: urDiagram.semEnergiaPorUr,
+  })
+
+  monitoringErrorsRef.current = monitoringErrors
+
+  const getCaptureContext = useCallback(
+    () => ({
+      semEnergiaPorUr: urDiagram.semEnergiaPorUr,
+      fallenFromFiber: urDiagram.getFallenFromFiber(),
+      activeUrs: urDiagram.getActiveUrs(),
+      uprightChaves: urDiagram.getUprightChaves(),
+      radioState: radioDiagram.captureReviewState(),
+      radioAlert,
+      activeFailure: fiberNetwork.activeFailure,
+      fixedFailureCabos,
+      errors: monitoringErrorsRef.current,
+    }),
+    [
+      urDiagram,
+      radioDiagram,
+      radioAlert,
+      fiberNetwork.activeFailure,
+      fixedFailureCabos,
+    ],
+  )
+
+  const restoreRefs = useCallback(
+    (snapshot) => {
+      urDiagram.restoreReviewRefs(snapshot.ur)
+      radioDiagram.restoreReviewState(snapshot.radio)
+      fiberNetwork.restoreActiveFailure(snapshot.react?.activeFailure)
+    },
+    [urDiagram, radioDiagram, fiberNetwork],
+  )
+
+  const handleRestoreReactState = useCallback((reactState) => {
+    setRadioAlert(reactState.radioAlert)
+    setFixedFailureCabos(reactState.fixedFailureCabos)
+  }, [])
+
+  const review = useMonitoringReview({
+    getSvg: fiberDiagram.getSvg,
+    fiberIds: fiberDiagram.fiberIds,
+    getCaptureContext,
+    restoreRefs,
+    onRestoreReactState: handleRestoreReactState,
+  })
+
+  recordFrameRef.current = review.recordFrame
+
+  const scheduleRecord = useCallback((label, delayMs = 200) => {
+    window.setTimeout(() => recordFrameRef.current(label), delayMs)
+  }, [])
+
   const handleSvgReady = useCallback(
     (svg) => {
       fiberDiagram.registerSvg(svg)
@@ -78,6 +144,10 @@ export function MonitoramentoPage() {
       radioDiagram.registerSvg(svg)
       urDiagram.registerSvg(svg)
       fiberNetwork.refreshNetworkFromSvg()
+      if (!svgReadyRef.current) {
+        svgReadyRef.current = true
+        window.setTimeout(() => recordFrameRef.current('Estado inicial'), 500)
+      }
     },
     [
       fiberDiagram,
@@ -118,7 +188,8 @@ export function MonitoramentoPage() {
     }
     setFixedFailureCabos([])
     setRadioAlert(null)
-  }, [fiberNetwork, radioDiagram, fiberDiagram, urDiagram])
+    scheduleRecord('Simulação de fibra limpa')
+  }, [fiberNetwork, radioDiagram, fiberDiagram, urDiagram, scheduleRecord])
 
   const applyFixedSimScenario = useCallback(
     (scenario) => {
@@ -136,8 +207,10 @@ export function MonitoramentoPage() {
         onRadioAlert: setRadioAlert,
         onFailureCabos: setFixedFailureCabos,
       })
+
+      scheduleRecord(`Simulação fixa: ${scenario}`, 600)
     },
-    [fiberDiagram, radioDiagram, urDiagram],
+    [fiberDiagram, radioDiagram, urDiagram, scheduleRecord],
   )
 
   const applySetUrSemEnergia = useCallback(
@@ -156,7 +229,8 @@ export function MonitoramentoPage() {
 
   const applyClearUrSemEnergia = useCallback(() => {
     urDiagram.clearAllUrSemEnergia()
-  }, [urDiagram])
+    scheduleRecord('Falta de energia limpa')
+  }, [urDiagram, scheduleRecord])
 
   const applyRadioUnstable = useCallback(() => {
     applyRadioUnstableSimulation({
@@ -165,26 +239,20 @@ export function MonitoramentoPage() {
     })
   }, [radioDiagram])
 
-  const { entries: monitoringErrors, clearLog } = useMonitoringErrorLog({
-    saveError: fiberNetwork.saveError,
-    radioAlert,
-    failureCabos:
-      fixedFailureCabos.length > 0
-        ? fixedFailureCabos
-        : fiberNetwork.activeFailure.cabos,
-    semEnergiaPorUr: urDiagram.semEnergiaPorUr,
-  })
-
   const applyClearAll = useCallback(() => {
     clearLog()
+    review.clearRecording()
     fiberNetwork.clearSaveError()
     applyClearFiberSimulation()
     applyClearUrSemEnergia()
+    scheduleRecord('Estado inicial', 300)
   }, [
     clearLog,
+    review,
     fiberNetwork,
     applyClearFiberSimulation,
     applyClearUrSemEnergia,
+    scheduleRecord,
   ])
 
   const handleRemoteDemoMessage = useCallback(
@@ -246,6 +314,61 @@ export function MonitoramentoPage() {
     setLegendOpen(expanded)
   }, [])
 
+  const handleModeChange = useCallback(
+    (mode) => {
+      if (mode === INTERACTION_MODE.REVIEW) {
+        review.enterReview()
+        return
+      }
+
+      if (review.isReviewActive) {
+        review.exitReview()
+      }
+
+      setCanvasMode(mode)
+    },
+    [review],
+  )
+
+  const handleReviewExit = useCallback(() => {
+    review.exitReview()
+    setCanvasMode(INTERACTION_MODE.NAVIGATION)
+  }, [review])
+
+  useEffect(() => {
+    urDiagram.setOnUrClick((number, isActive) => {
+      if (review.isReviewActive) return
+
+      const label = isActive ? `UR ${number} conectada` : `UR ${number} desconectada`
+      const delay = isActive ? UR_CONNECT_DELAY_MS + 150 : 150
+      scheduleRecord(label, delay)
+    })
+  }, [urDiagram, review.isReviewActive, scheduleRecord])
+
+  useEffect(() => {
+    if (review.isReviewActive || !svgReadyRef.current) return
+
+    const latest = monitoringErrors[monitoringErrors.length - 1]
+    const label = latest
+      ? `${latest.title}${latest.message ? `: ${latest.message}` : ''}`
+      : 'Alteração no sistema'
+
+    scheduleRecord(label, 250)
+  }, [
+    monitoringErrors.length,
+    urDiagram.semEnergiaPorUr,
+    review.isReviewActive,
+    scheduleRecord,
+  ])
+
+  const displayedErrors = review.isReviewActive
+    ? review.reviewErrors
+    : monitoringErrors
+
+  const interactionMode = review.isReviewActive
+    ? INTERACTION_MODE.NAVIGATION
+    : canvasMode
+
   const demoToolsTop = legendOpen
     ? MONITORING_LEGEND_EXPANDED_OFFSET_PX
     : MONITORING_LEGEND_COLLAPSED_OFFSET_PX
@@ -266,11 +389,34 @@ export function MonitoramentoPage() {
       <div style={bodyStyle}>
         <DemoPeerPanel sync={demoSync} />
 
-        <ErrorsPanel errors={monitoringErrors} onClearAll={handleClearAllErrors} />
+        <ErrorsPanel
+          errors={displayedErrors}
+          onClearAll={handleClearAllErrors}
+          reviewActive={review.isReviewActive}
+        />
+
+        <ReviewPlayer
+          visible={review.isReviewActive}
+          frameCount={review.frameCount}
+          currentIndex={review.currentIndex}
+          currentFrame={review.currentFrame}
+          reviewErrors={review.reviewErrors}
+          isPlaying={review.isPlaying}
+          playbackSpeed={review.playbackSpeed}
+          canStepBack={review.canStepBack}
+          canStepForward={review.canStepForward}
+          canPlay={review.canPlay}
+          onTogglePlay={review.togglePlay}
+          onStepBack={review.stepBackward}
+          onStepForward={review.stepForward}
+          onGoToFrame={review.goToFrame}
+          onCycleSpeed={review.cycleSpeed}
+          onExit={handleReviewExit}
+        />
 
         <MonitoringLegend onExpandedChange={handleLegendExpandedChange} />
 
-        {showDemoTools ? (
+        {showDemoTools && !review.isReviewActive ? (
           <DemoToolsStack
             top={demoToolsTop}
             onApplyMessage={handleRemoteDemoMessage}
@@ -281,27 +427,30 @@ export function MonitoramentoPage() {
           />
         ) : null}
 
-        <UrConfirmPopup
-          urNumber={urDiagram.urConfirm?.number}
-          anchorX={urDiagram.urConfirm?.x ?? 0}
-          anchorY={urDiagram.urConfirm?.y ?? 0}
-          action={urDiagram.urConfirm?.action}
-          onConfirm={urDiagram.confirmUrAction}
-          onCancel={urDiagram.cancelUrAction}
-        />
+        {!review.isReviewActive ? (
+          <UrConfirmPopup
+            urNumber={urDiagram.urConfirm?.number}
+            anchorX={urDiagram.urConfirm?.x ?? 0}
+            anchorY={urDiagram.urConfirm?.y ?? 0}
+            action={urDiagram.urConfirm?.action}
+            onConfirm={urDiagram.confirmUrAction}
+            onCancel={urDiagram.cancelUrAction}
+          />
+        ) : null}
 
         <CanvasViewport
-          mode={canvasMode}
+          mode={interactionMode}
           toolbar={
             <CanvasModeToolbar
               mode={canvasMode}
-              onModeChange={setCanvasMode}
+              onModeChange={handleModeChange}
+              reviewActive={review.isReviewActive}
             />
           }
         >
           <CanvasWorld
             onSvgReady={handleSvgReady}
-            interactionMode={canvasMode}
+            interactionMode={interactionMode}
           />
         </CanvasViewport>
       </div>
