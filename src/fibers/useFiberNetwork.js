@@ -167,6 +167,15 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
     setSaveError(null)
   }, [])
 
+  const restoreActiveFailure = useCallback((failure = { cabos: [], nodes: [] }) => {
+    const next = {
+      cabos: [...(failure.cabos ?? [])],
+      nodes: [...(failure.nodes ?? [])],
+    }
+    lastFailureRef.current = next
+    setActiveFailure(next)
+  }, [])
+
   const exportNetwork = useCallback(() => exportFiberNetwork(network), [network])
 
   const importNetwork = useCallback(
@@ -238,6 +247,7 @@ export function useFiberNetwork({ getSvg, fiberIds, interactionMode, configMode 
     saveUrRuleConfig,
     simulateDrop,
     clearSimulation,
+    restoreActiveFailure,
     exportNetwork,
     importNetwork,
     resetNetworkStorage,
