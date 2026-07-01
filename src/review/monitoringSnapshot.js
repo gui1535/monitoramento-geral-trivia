@@ -5,13 +5,13 @@ import {
   paintFiberRealFall,
 } from '../fibers/cascadeAnimation'
 import {
-  FIBER_FALL_CLASS,
-  FIBER_REAL_FALL_CLASS,
   FIBER_STATUS,
   FIBER_STATUS_COLORS,
   getAllFiberIds,
 } from '../fibers/fibers'
 import {
+  FIBER_FALL_CLASS,
+  FIBER_REAL_FALL_CLASS,
   NODE_OFFLINE_CLASS,
 } from '../fibers/fiberFailure'
 import {
