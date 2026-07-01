@@ -12,9 +12,9 @@ import { colors } from '../styles/tokens'
 
 const PAGE_SIZE = 100
 
-const widgetStyle = (reviewActive) => ({
+const widgetStyle = {
   position: 'absolute',
-  bottom: reviewActive ? 148 : 16,
+  bottom: 16,
   right: 16,
   zIndex: 50,
   width: 'min(400px, calc(100vw - 32px))',
@@ -23,8 +23,7 @@ const widgetStyle = (reviewActive) => ({
   border: `1px solid ${colors.border}`,
   boxShadow: '0 12px 40px rgba(18, 20, 26, 0.18)',
   pointerEvents: 'auto',
-  transition: 'bottom 0.2s ease',
-})
+}
 
 const modalOverlayStyle = {
   position: 'fixed',
@@ -453,7 +452,7 @@ function ErrorsModal({
   )
 }
 
-export function ErrorsPanel({ errors = [], onClearAll, reviewActive = false }) {
+export function ErrorsPanel({ errors = [], onClearAll }) {
   const [expanded, setExpanded] = useState(false)
   const [search, setSearch] = useState('')
   const [dateFrom, setDateFrom] = useState('')
@@ -498,7 +497,7 @@ export function ErrorsPanel({ errors = [], onClearAll, reviewActive = false }) {
     }
   }, [expanded])
 
-  if (errors.length === 0 && !reviewActive) return null
+  if (errors.length === 0) return null
 
   function dismissOne(id) {
     setDismissedIds((prev) => new Set([...prev, id]))
@@ -529,7 +528,7 @@ export function ErrorsPanel({ errors = [], onClearAll, reviewActive = false }) {
     <>
       {!expanded && (
         <div
-          style={widgetStyle(reviewActive)}
+          style={widgetStyle}
           role="region"
           aria-label="Erros do monitoramento"
           onPointerDown={(e) => e.stopPropagation()}
@@ -540,11 +539,7 @@ export function ErrorsPanel({ errors = [], onClearAll, reviewActive = false }) {
                 {activeErrors.length || errors.length}
               </span>
               <strong style={{ fontSize: 14, color: colors.text }}>
-                {reviewActive
-                  ? 'Review — falhas neste momento'
-                  : errors.length === 1
-                    ? '1 registro no log'
-                    : `${errors.length} registros no log`}
+                {errors.length === 1 ? '1 registro no log' : `${errors.length} registros no log`}
               </strong>
             </div>
 

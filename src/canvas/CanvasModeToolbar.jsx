@@ -86,7 +86,6 @@ function EbilockLink() {
 const BASE_MODES = [
   { id: INTERACTION_MODE.NAVIGATION, label: 'Navegação' },
   { id: INTERACTION_MODE.ACTION, label: 'Ação' },
-  { id: INTERACTION_MODE.REVIEW, label: 'Review' },
 ]
 
 const FIBER_CONFIG_MODE = {
@@ -97,8 +96,8 @@ const FIBER_CONFIG_MODE = {
 export function CanvasModeToolbar({
   mode,
   onModeChange,
+  onReviewClick,
   showFiberConfig = false,
-  reviewActive = false,
 }) {
   const modes = showFiberConfig
     ? [...BASE_MODES, FIBER_CONFIG_MODE]
@@ -118,10 +117,13 @@ export function CanvasModeToolbar({
           <ModeButton
             key={item.id}
             label={item.label}
-            active={item.id === INTERACTION_MODE.REVIEW ? reviewActive : mode === item.id}
+            active={mode === item.id}
             onClick={() => onModeChange(item.id)}
           />
         ))}
+        {onReviewClick ? (
+          <ModeButton label="Review" active={false} onClick={onReviewClick} />
+        ) : null}
       </div>
 
       <EbilockLink />

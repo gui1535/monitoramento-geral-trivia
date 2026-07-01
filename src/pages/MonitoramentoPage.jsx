@@ -8,7 +8,7 @@ import {
 import { DemoMobileScreen } from '../components/DemoMobileScreen'
 import { DemoPeerPanel } from '../components/DemoPeerPanel'
 import { ErrorsPanel } from '../components/ErrorsPanel'
-import { ReviewPlayer } from '../components/ReviewPlayer'
+import { ReviewPage } from './ReviewPage'
 import {
   applyDemoSyncMessage,
   createClearSimulationMessage,
@@ -144,6 +144,7 @@ export function MonitoramentoPage() {
       radioDiagram.registerSvg(svg)
       urDiagram.registerSvg(svg)
       fiberNetwork.refreshNetworkFromSvg()
+      review.syncLiveRestore()
       if (!svgReadyRef.current) {
         svgReadyRef.current = true
         window.setTimeout(() => recordFrameRef.current('Estado inicial'), 500)
@@ -155,6 +156,25 @@ export function MonitoramentoPage() {
       radioDiagram,
       urDiagram,
       fiberNetwork.refreshNetworkFromSvg,
+      review.syncLiveRestore,
+    ],
+  )
+
+  const handleReviewSvgReady = useCallback(
+    (svg) => {
+      fiberDiagram.registerSvg(svg)
+      ledDiagram.registerSvg(svg)
+      radioDiagram.registerSvg(svg)
+      urDiagram.registerSvg(svg)
+      review.goToFrame(review.currentIndex)
+    },
+    [
+      fiberDiagram,
+      ledDiagram,
+      radioDiagram,
+      urDiagram,
+      review.goToFrame,
+      review.currentIndex,
     ],
   )
 
@@ -314,25 +334,16 @@ export function MonitoramentoPage() {
     setLegendOpen(expanded)
   }, [])
 
-  const handleModeChange = useCallback(
-    (mode) => {
-      if (mode === INTERACTION_MODE.REVIEW) {
-        review.enterReview()
-        return
-      }
+  const handleOpenReview = useCallback(() => {
+    review.enterReview()
+  }, [review])
 
-      if (review.isReviewActive) {
-        review.exitReview()
-      }
-
-      setCanvasMode(mode)
-    },
-    [review],
-  )
+  const handleModeChange = useCallback((mode) => {
+    setCanvasMode(mode)
+  }, [])
 
   const handleReviewExit = useCallback(() => {
     review.exitReview()
-    setCanvasMode(INTERACTION_MODE.NAVIGATION)
   }, [review])
 
   useEffect(() => {
@@ -361,20 +372,18 @@ export function MonitoramentoPage() {
     scheduleRecord,
   ])
 
-  const displayedErrors = review.isReviewActive
-    ? review.reviewErrors
-    : monitoringErrors
-
-  const interactionMode = review.isReviewActive
-    ? INTERACTION_MODE.NAVIGATION
-    : canvasMode
-
-  const demoToolsTop = legendOpen
-    ? MONITORING_LEGEND_EXPANDED_OFFSET_PX
-    : MONITORING_LEGEND_COLLAPSED_OFFSET_PX
-
   const showMobileControl =
     isMobileClient && demoSync.role !== DEMO_PEER_ROLE.HOST
+
+  if (review.isReviewActive) {
+    return (
+      <ReviewPage
+        review={review}
+        onExit={handleReviewExit}
+        onSvgReady={handleReviewSvgReady}
+      />
+    )
+  }
 
   if (showMobileControl) {
     return (
@@ -384,39 +393,20 @@ export function MonitoramentoPage() {
     )
   }
 
+  const demoToolsTop = legendOpen
+    ? MONITORING_LEGEND_EXPANDED_OFFSET_PX
+    : MONITORING_LEGEND_COLLAPSED_OFFSET_PX
+
   return (
     <main style={pageStyle}>
       <div style={bodyStyle}>
         <DemoPeerPanel sync={demoSync} />
 
-        <ErrorsPanel
-          errors={displayedErrors}
-          onClearAll={handleClearAllErrors}
-          reviewActive={review.isReviewActive}
-        />
-
-        <ReviewPlayer
-          visible={review.isReviewActive}
-          frameCount={review.frameCount}
-          currentIndex={review.currentIndex}
-          currentFrame={review.currentFrame}
-          reviewErrors={review.reviewErrors}
-          isPlaying={review.isPlaying}
-          playbackSpeed={review.playbackSpeed}
-          canStepBack={review.canStepBack}
-          canStepForward={review.canStepForward}
-          canPlay={review.canPlay}
-          onTogglePlay={review.togglePlay}
-          onStepBack={review.stepBackward}
-          onStepForward={review.stepForward}
-          onGoToFrame={review.goToFrame}
-          onCycleSpeed={review.cycleSpeed}
-          onExit={handleReviewExit}
-        />
+        <ErrorsPanel errors={monitoringErrors} onClearAll={handleClearAllErrors} />
 
         <MonitoringLegend onExpandedChange={handleLegendExpandedChange} />
 
-        {showDemoTools && !review.isReviewActive ? (
+        {showDemoTools ? (
           <DemoToolsStack
             top={demoToolsTop}
             onApplyMessage={handleRemoteDemoMessage}
@@ -427,30 +417,28 @@ export function MonitoramentoPage() {
           />
         ) : null}
 
-        {!review.isReviewActive ? (
-          <UrConfirmPopup
-            urNumber={urDiagram.urConfirm?.number}
-            anchorX={urDiagram.urConfirm?.x ?? 0}
-            anchorY={urDiagram.urConfirm?.y ?? 0}
-            action={urDiagram.urConfirm?.action}
-            onConfirm={urDiagram.confirmUrAction}
-            onCancel={urDiagram.cancelUrAction}
-          />
-        ) : null}
+        <UrConfirmPopup
+          urNumber={urDiagram.urConfirm?.number}
+          anchorX={urDiagram.urConfirm?.x ?? 0}
+          anchorY={urDiagram.urConfirm?.y ?? 0}
+          action={urDiagram.urConfirm?.action}
+          onConfirm={urDiagram.confirmUrAction}
+          onCancel={urDiagram.cancelUrAction}
+        />
 
         <CanvasViewport
-          mode={interactionMode}
+          mode={canvasMode}
           toolbar={
             <CanvasModeToolbar
               mode={canvasMode}
               onModeChange={handleModeChange}
-              reviewActive={review.isReviewActive}
+              onReviewClick={handleOpenReview}
             />
           }
         >
           <CanvasWorld
             onSvgReady={handleSvgReady}
-            interactionMode={interactionMode}
+            interactionMode={canvasMode}
           />
         </CanvasViewport>
       </div>

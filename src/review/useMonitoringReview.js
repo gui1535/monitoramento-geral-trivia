@@ -22,6 +22,7 @@ export function useMonitoringReview({
   const [isPlaying, setIsPlaying] = useState(false)
   const [speedIndex, setSpeedIndex] = useState(1)
   const liveSnapshotRef = useRef(null)
+  const pendingLiveRestoreRef = useRef(null)
   const playTimerRef = useRef(null)
   const lastFingerprintRef = useRef('')
 
@@ -128,9 +129,25 @@ export function useMonitoringReview({
     setIsReviewActive(true)
     setIsPlaying(false)
     setCurrentIndex(framesRef.current.length - 1)
-    applyFrame(framesRef.current.length - 1, { visualOnly: true })
     return true
-  }, [applyFrame, fiberIds, getCaptureContext, getSvg, recordFrame])
+  }, [fiberIds, getCaptureContext, getSvg, recordFrame])
+
+  const syncReviewFrame = useCallback(() => {
+    if (framesRef.current.length === 0) return
+    applyFrame(currentIndex, { visualOnly: true, updateIndex: false })
+  }, [applyFrame, currentIndex])
+
+  const syncLiveRestore = useCallback(() => {
+    const live = pendingLiveRestoreRef.current
+    if (!live) return
+
+    const svg = getSvg()
+    if (!svg) return
+
+    applyMonitoringSnapshot(svg, live, { fiberIds, restoreRefs })
+    onRestoreReactState?.(snapshotToReactState(live))
+    pendingLiveRestoreRef.current = null
+  }, [fiberIds, getSvg, onRestoreReactState, restoreRefs])
 
   const exitReview = useCallback(() => {
     setIsPlaying(false)
@@ -141,16 +158,13 @@ export function useMonitoringReview({
     }
 
     const live = liveSnapshotRef.current
-    const svg = getSvg()
-
-    if (svg && live) {
-      applyMonitoringSnapshot(svg, live, { fiberIds, restoreRefs })
-      onRestoreReactState?.(snapshotToReactState(live))
+    if (live) {
+      pendingLiveRestoreRef.current = live
     }
 
     liveSnapshotRef.current = null
     setIsReviewActive(false)
-  }, [fiberIds, getSvg, onRestoreReactState, restoreRefs])
+  }, [])
 
   const goToFrame = useCallback(
     (index) => {
@@ -251,5 +265,7 @@ export function useMonitoringReview({
     cycleSpeed,
     clearRecording,
     getFrames,
+    syncReviewFrame,
+    syncLiveRestore,
   }
 }
