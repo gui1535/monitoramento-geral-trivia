@@ -12,4 +12,5 @@ export const INTERACTION_MODE = {
   NAVIGATION: 'navigation',
   ACTION: 'action',
   FIBER_CONFIG: 'fiber_config',
+  REVIEW: 'review',
 }
