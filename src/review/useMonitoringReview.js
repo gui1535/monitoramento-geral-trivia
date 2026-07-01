@@ -1,12 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   applyMonitoringSnapshot,
   captureMonitoringSnapshot,
   snapshotToReactState,
 } from './monitoringSnapshot'
+import {
+  buildReviewTimeline,
+  clampTimelineTime,
+  findFrameIndexAtTime,
+  REVIEW_TICK_MS,
+} from './reviewTimeline'
 
-const DEFAULT_PLAYBACK_MS = 1200
-const SPEEDS = [0.5, 1, 1.5, 2]
+const SPEEDS = [0.5, 1, 1.5, 2, 4]
 
 export function useMonitoringReview({
   getSvg,
@@ -16,8 +21,10 @@ export function useMonitoringReview({
   onRestoreReactState,
 }) {
   const framesRef = useRef([])
+  const timelineRef = useRef(buildReviewTimeline([]))
   const [frameCount, setFrameCount] = useState(0)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
   const [isReviewActive, setIsReviewActive] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [speedIndex, setSpeedIndex] = useState(1)
@@ -25,8 +32,14 @@ export function useMonitoringReview({
   const pendingLiveRestoreRef = useRef(null)
   const playTimerRef = useRef(null)
   const lastFingerprintRef = useRef('')
+  const lastAppliedIndexRef = useRef(-1)
 
   const getFrames = useCallback(() => framesRef.current, [])
+
+  const refreshTimeline = useCallback(() => {
+    timelineRef.current = buildReviewTimeline(framesRef.current)
+    return timelineRef.current
+  }, [])
 
   const applyFrame = useCallback(
     (index, { updateIndex = true, visualOnly = false } = {}) => {
@@ -48,11 +61,36 @@ export function useMonitoringReview({
         }
       }
 
+      lastAppliedIndexRef.current = safeIndex
+
       if (updateIndex) {
         setCurrentIndex(safeIndex)
       }
     },
     [fiberIds, getSvg, onRestoreReactState, restoreRefs],
+  )
+
+  const seekToTime = useCallback(
+    (timeMs, { keepPlaying = false } = {}) => {
+      if (framesRef.current.length === 0) return
+
+      const timeline = refreshTimeline()
+      const clamped = clampTimelineTime(timeMs, timeline)
+      const index = findFrameIndexAtTime(framesRef.current, clamped, timeline)
+
+      setCurrentTime(clamped)
+
+      if (index !== lastAppliedIndexRef.current) {
+        applyFrame(index, { visualOnly: true })
+      } else {
+        setCurrentIndex(index)
+      }
+
+      if (!keepPlaying) {
+        setIsPlaying(false)
+      }
+    },
+    [applyFrame, refreshTimeline],
   )
 
   const recordFrame = useCallback(
@@ -62,6 +100,8 @@ export function useMonitoringReview({
       const svg = getSvg()
       const context = getCaptureContext?.()
       if (!svg || !context) return
+
+      const errors = context.errors ?? []
 
       const snapshot = captureMonitoringSnapshot({
         svg,
@@ -75,7 +115,8 @@ export function useMonitoringReview({
         radioAlert: context.radioAlert,
         activeFailure: context.activeFailure,
         fixedFailureCabos: context.fixedFailureCabos,
-        errors: context.errors,
+        errors,
+        timestamp: errors[errors.length - 1]?.createdAt,
       })
 
       if (!snapshot) return
@@ -94,10 +135,12 @@ export function useMonitoringReview({
 
       lastFingerprintRef.current = fingerprint
       framesRef.current = [...framesRef.current, snapshot]
+      refreshTimeline()
       setFrameCount(framesRef.current.length)
       setCurrentIndex(framesRef.current.length - 1)
+      setCurrentTime(snapshot.timestamp)
     },
-    [fiberIds, getCaptureContext, getSvg, isReviewActive],
+    [fiberIds, getCaptureContext, getSvg, isReviewActive, refreshTimeline],
   )
 
   const enterReview = useCallback(() => {
@@ -110,6 +153,8 @@ export function useMonitoringReview({
     }
 
     if (framesRef.current.length === 0) return false
+
+    const timeline = refreshTimeline()
 
     liveSnapshotRef.current = captureMonitoringSnapshot({
       svg,
@@ -126,16 +171,18 @@ export function useMonitoringReview({
       errors: context.errors,
     })
 
+    lastAppliedIndexRef.current = -1
     setIsReviewActive(true)
     setIsPlaying(false)
-    setCurrentIndex(framesRef.current.length - 1)
+    setCurrentTime(timeline.start)
+    setCurrentIndex(0)
     return true
-  }, [fiberIds, getCaptureContext, getSvg, recordFrame])
+  }, [fiberIds, getCaptureContext, getSvg, recordFrame, refreshTimeline])
 
   const syncReviewFrame = useCallback(() => {
     if (framesRef.current.length === 0) return
-    applyFrame(currentIndex, { visualOnly: true, updateIndex: false })
-  }, [applyFrame, currentIndex])
+    seekToTime(currentTime)
+  }, [currentTime, seekToTime])
 
   const syncLiveRestore = useCallback(() => {
     const live = pendingLiveRestoreRef.current
@@ -163,38 +210,78 @@ export function useMonitoringReview({
     }
 
     liveSnapshotRef.current = null
+    lastAppliedIndexRef.current = -1
     setIsReviewActive(false)
   }, [])
 
   const goToFrame = useCallback(
     (index) => {
       if (!isReviewActive) return
-      setIsPlaying(false)
-      applyFrame(index, { visualOnly: true })
+
+      const frame = framesRef.current[index]
+      if (!frame) return
+
+      seekToTime(frame.timestamp)
     },
-    [applyFrame, isReviewActive],
+    [isReviewActive, seekToTime],
   )
 
   const stepForward = useCallback(() => {
-    goToFrame(currentIndex + 1)
-  }, [currentIndex, goToFrame])
+    const timeline = refreshTimeline()
+    const next = clampTimelineTime(currentTime + REVIEW_TICK_MS, timeline)
+
+    if (next > currentTime) {
+      seekToTime(next)
+      return
+    }
+
+    const nextFrame = framesRef.current[currentIndex + 1]
+    if (nextFrame) {
+      seekToTime(nextFrame.timestamp)
+    }
+  }, [currentIndex, currentTime, refreshTimeline, seekToTime])
 
   const stepBackward = useCallback(() => {
-    goToFrame(currentIndex - 1)
-  }, [currentIndex, goToFrame])
+    const timeline = refreshTimeline()
+    const next = clampTimelineTime(currentTime - REVIEW_TICK_MS, timeline)
+
+    if (next < currentTime) {
+      seekToTime(next)
+      return
+    }
+
+    const prevFrame = framesRef.current[currentIndex - 1]
+    if (prevFrame) {
+      seekToTime(prevFrame.timestamp)
+    }
+  }, [currentIndex, currentTime, refreshTimeline, seekToTime])
 
   const togglePlay = useCallback(() => {
     if (!isReviewActive) return
+    const timeline = refreshTimeline()
+    if (!timeline.duration && frameCount <= 1) return
+    if (!isPlaying && currentTime >= timeline.end) {
+      seekToTime(timeline.start)
+    }
     setIsPlaying((playing) => !playing)
-  }, [isReviewActive])
+  }, [
+    currentTime,
+    frameCount,
+    isPlaying,
+    isReviewActive,
+    refreshTimeline,
+    seekToTime,
+  ])
 
   const seekToProgress = useCallback(
     (progress) => {
-      if (!isReviewActive || framesRef.current.length === 0) return
-      const index = Math.round(progress * (framesRef.current.length - 1))
-      goToFrame(index)
+      if (!isReviewActive) return
+      const timeline = refreshTimeline()
+      if (!timeline.duration) return
+      const timeMs = timeline.start + progress * timeline.duration
+      seekToTime(timeMs)
     },
-    [goToFrame, isReviewActive],
+    [isReviewActive, refreshTimeline, seekToTime],
   )
 
   const cycleSpeed = useCallback(() => {
@@ -204,9 +291,12 @@ export function useMonitoringReview({
   const clearRecording = useCallback(() => {
     if (isReviewActive) exitReview()
     framesRef.current = []
+    timelineRef.current = buildReviewTimeline([])
     lastFingerprintRef.current = ''
+    lastAppliedIndexRef.current = -1
     setFrameCount(0)
     setCurrentIndex(0)
+    setCurrentTime(0)
   }, [exitReview, isReviewActive])
 
   useEffect(() => {
@@ -218,16 +308,34 @@ export function useMonitoringReview({
       return undefined
     }
 
-    const intervalMs = DEFAULT_PLAYBACK_MS / SPEEDS[speedIndex]
+    const intervalMs = REVIEW_TICK_MS / SPEEDS[speedIndex]
 
     playTimerRef.current = window.setInterval(() => {
-      setCurrentIndex((prev) => {
-        const next = prev + 1
-        if (next >= framesRef.current.length) {
+      const timeline = refreshTimeline()
+      setCurrentTime((prev) => {
+        const next = prev + REVIEW_TICK_MS
+        if (next > timeline.end) {
           setIsPlaying(false)
-          return prev
+          const index = findFrameIndexAtTime(
+            framesRef.current,
+            timeline.end,
+            timeline,
+          )
+          if (index !== lastAppliedIndexRef.current) {
+            applyFrame(index, { visualOnly: true })
+          } else {
+            setCurrentIndex(index)
+          }
+          return timeline.end
         }
-        applyFrame(next, { updateIndex: false, visualOnly: true })
+
+        const index = findFrameIndexAtTime(framesRef.current, next, timeline)
+        if (index !== lastAppliedIndexRef.current) {
+          applyFrame(index, { visualOnly: true })
+        } else {
+          setCurrentIndex(index)
+        }
+
         return next
       })
     }, intervalMs)
@@ -238,26 +346,38 @@ export function useMonitoringReview({
         playTimerRef.current = null
       }
     }
-  }, [applyFrame, isPlaying, isReviewActive, speedIndex])
+  }, [applyFrame, isPlaying, isReviewActive, refreshTimeline, speedIndex])
+
+  const timeline = useMemo(
+    () => buildReviewTimeline(framesRef.current),
+    [frameCount, currentTime],
+  )
 
   const currentFrame = framesRef.current[currentIndex] ?? null
-  const reviewErrors = currentFrame?.errors ?? []
 
   return {
     frameCount,
     currentIndex,
     currentFrame,
-    reviewErrors,
+    currentTime,
+    timelineStart: timeline.start,
+    timelineEnd: timeline.end,
+    timelineDuration: timeline.duration,
+    timelineProgress:
+      timeline.duration > 0
+        ? (currentTime - timeline.start) / timeline.duration
+        : 0,
     isReviewActive,
     isPlaying,
     playbackSpeed: SPEEDS[speedIndex],
-    canStepBack: currentIndex > 0,
-    canStepForward: currentIndex < frameCount - 1,
-    canPlay: frameCount > 1,
+    canStepBack: currentTime > timeline.start,
+    canStepForward: currentTime < timeline.end,
+    canPlay: timeline.duration > 0 || frameCount > 1,
     recordFrame,
     enterReview,
     exitReview,
     goToFrame,
+    seekToTime,
     stepForward,
     stepBackward,
     togglePlay,

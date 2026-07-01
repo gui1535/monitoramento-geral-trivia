@@ -2,6 +2,14 @@
 
 Aplicação de monitoramento (React + Vite) com diagrama SVG, fibra, rádios e URs.
 
+## Requisitos
+
+- **Node.js 20.19+** ou **22.12+** (Vite 8 não funciona no Node 16/18)
+
+```bash
+node -v   # deve mostrar v20.19.x ou superior
+```
+
 ## Desenvolvimento
 
 ```bash

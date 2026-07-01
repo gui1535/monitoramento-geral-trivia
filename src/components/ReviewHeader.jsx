@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { formatLogTimestamp } from '../errors/formatLogTimestamp'
+import { formatReviewElapsed } from '../review/reviewTimeline'
 import { colors } from '../styles/tokens'
 
 const headerStyle = {
@@ -123,8 +124,9 @@ function ControlButton({ label, onClick, disabled = false, ghost = false }) {
 }
 
 export function ReviewHeader({
-  frameCount,
-  currentIndex,
+  currentTime,
+  timelineStart,
+  timelineDuration,
   currentFrame,
   isPlaying,
   playbackSpeed,
@@ -134,7 +136,7 @@ export function ReviewHeader({
   onTogglePlay,
   onStepBack,
   onStepForward,
-  onGoToFrame,
+  onSeekToTime,
   onCycleSpeed,
   onExit,
 }) {
@@ -158,15 +160,16 @@ export function ReviewHeader({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onStepBack, onStepForward, onTogglePlay, onExit])
 
-  const frameTime = currentFrame?.timestamp ?? 0
+  const elapsedMs = Math.max(0, currentTime - timelineStart)
+  const sliderValue = elapsedMs
 
   return (
     <header style={headerStyle} role="banner" aria-label="Review de falhas">
       <div style={topRowStyle}>
         <div style={titleBlockStyle}>
           <p style={titleStyle}>Review</p>
-          <p style={eventStyle}>{currentFrame?.label || 'Sem eventos registrados'}</p>
-          <p style={timeStyle}>{formatLogTimestamp(frameTime)}</p>
+          <p style={eventStyle}>{currentFrame?.label || 'Aguardando evento…'}</p>
+          <p style={timeStyle}>{formatLogTimestamp(currentTime)}</p>
         </div>
 
         <div style={controlsRowStyle}>
@@ -175,28 +178,45 @@ export function ReviewHeader({
             onClick={onTogglePlay}
             disabled={!canPlay}
           />
-          <ControlButton label="⏮" onClick={onStepBack} disabled={!canStepBack} ghost />
-          <ControlButton label="⏭" onClick={onStepForward} disabled={!canStepForward} ghost />
+          <ControlButton
+            label="−1s"
+            onClick={onStepBack}
+            disabled={!canStepBack}
+            ghost
+          />
+          <ControlButton
+            label="+1s"
+            onClick={onStepForward}
+            disabled={!canStepForward}
+            ghost
+          />
           <ControlButton label={`${playbackSpeed}x`} onClick={onCycleSpeed} ghost />
           <span style={counterStyle}>
-            {currentIndex + 1} / {frameCount}
+            {formatReviewElapsed(elapsedMs)} / {formatReviewElapsed(timelineDuration)}
           </span>
           <ControlButton label="Voltar ao monitoramento" onClick={onExit} ghost />
         </div>
       </div>
 
       <div style={sliderRowStyle}>
-        <span style={{ fontSize: 12, opacity: 0.75, flexShrink: 0 }}>Linha do tempo</span>
+        <span style={{ fontSize: 12, opacity: 0.75, flexShrink: 0, fontFamily: 'ui-monospace, monospace' }}>
+          {formatReviewElapsed(elapsedMs)}
+        </span>
         <input
           type="range"
           min={0}
-          max={Math.max(0, frameCount - 1)}
-          step={1}
-          value={currentIndex}
-          onChange={(event) => onGoToFrame?.(Number(event.target.value))}
+          max={Math.max(0, timelineDuration)}
+          step={1000}
+          value={sliderValue}
+          onChange={(event) =>
+            onSeekToTime?.(timelineStart + Number(event.target.value))
+          }
           style={sliderStyle}
-          aria-label="Navegar entre momentos do review"
+          aria-label="Linha do tempo do review em segundos"
         />
+        <span style={{ fontSize: 12, opacity: 0.75, flexShrink: 0, fontFamily: 'ui-monospace, monospace' }}>
+          {formatReviewElapsed(timelineDuration)}
+        </span>
       </div>
     </header>
   )

@@ -35,6 +35,7 @@ import {
   UR_NUMBERS,
   UR_STATUS,
 } from '../urs/urs'
+import { resolveSnapshotTimestamp } from './reviewTimeline'
 
 export const FIBER_SNAPSHOT_STATUS = {
   NORMAL: 'normal',
@@ -227,6 +228,7 @@ export function captureMonitoringSnapshot({
   fixedFailureCabos = [],
   errors = [],
   label = '',
+  timestamp = null,
 } = {}) {
   if (!svg) return null
 
@@ -236,8 +238,11 @@ export function captureMonitoringSnapshot({
     visibility: { lines: [], textos: [], imgs: [] },
   }
 
+  const resolvedTimestamp =
+    timestamp ?? resolveSnapshotTimestamp(errors, Date.now())
+
   return {
-    timestamp: Date.now(),
+    timestamp: resolvedTimestamp,
     label,
     fibers: captureFiberStates(svg, fiberIds),
     offlineNodes: captureOfflineNodes(svg),

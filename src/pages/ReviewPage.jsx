@@ -22,8 +22,9 @@ export function ReviewPage({ review, onExit, onSvgReady }) {
   return (
     <main style={pageStyle}>
       <ReviewHeader
-        frameCount={review.frameCount}
-        currentIndex={review.currentIndex}
+        currentTime={review.currentTime}
+        timelineStart={review.timelineStart}
+        timelineDuration={review.timelineDuration}
         currentFrame={review.currentFrame}
         isPlaying={review.isPlaying}
         playbackSpeed={review.playbackSpeed}
@@ -33,7 +34,7 @@ export function ReviewPage({ review, onExit, onSvgReady }) {
         onTogglePlay={review.togglePlay}
         onStepBack={review.stepBackward}
         onStepForward={review.stepForward}
-        onGoToFrame={review.goToFrame}
+        onSeekToTime={review.seekToTime}
         onCycleSpeed={review.cycleSpeed}
         onExit={onExit}
       />

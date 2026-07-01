@@ -166,15 +166,15 @@ export function MonitoramentoPage() {
       ledDiagram.registerSvg(svg)
       radioDiagram.registerSvg(svg)
       urDiagram.registerSvg(svg)
-      review.goToFrame(review.currentIndex)
+      review.seekToTime(review.timelineStart)
     },
     [
       fiberDiagram,
       ledDiagram,
       radioDiagram,
       urDiagram,
-      review.goToFrame,
-      review.currentIndex,
+      review.seekToTime,
+      review.timelineStart,
     ],
   )
 
