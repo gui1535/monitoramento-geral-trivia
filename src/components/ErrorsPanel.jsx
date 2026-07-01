@@ -12,9 +12,9 @@ import { colors } from '../styles/tokens'
 
 const PAGE_SIZE = 100
 
-const widgetStyle = {
+const widgetStyle = (reviewActive) => ({
   position: 'absolute',
-  bottom: 16,
+  bottom: reviewActive ? 148 : 16,
   right: 16,
   zIndex: 50,
   width: 'min(400px, calc(100vw - 32px))',
@@ -23,7 +23,8 @@ const widgetStyle = {
   border: `1px solid ${colors.border}`,
   boxShadow: '0 12px 40px rgba(18, 20, 26, 0.18)',
   pointerEvents: 'auto',
-}
+  transition: 'bottom 0.2s ease',
+})
 
 const modalOverlayStyle = {
   position: 'fixed',
@@ -452,7 +453,7 @@ function ErrorsModal({
   )
 }
 
-export function ErrorsPanel({ errors = [], onClearAll }) {
+export function ErrorsPanel({ errors = [], onClearAll, reviewActive = false }) {
   const [expanded, setExpanded] = useState(false)
   const [search, setSearch] = useState('')
   const [dateFrom, setDateFrom] = useState('')
@@ -497,7 +498,7 @@ export function ErrorsPanel({ errors = [], onClearAll }) {
     }
   }, [expanded])
 
-  if (errors.length === 0) return null
+  if (errors.length === 0 && !reviewActive) return null
 
   function dismissOne(id) {
     setDismissedIds((prev) => new Set([...prev, id]))
@@ -528,7 +529,7 @@ export function ErrorsPanel({ errors = [], onClearAll }) {
     <>
       {!expanded && (
         <div
-          style={widgetStyle}
+          style={widgetStyle(reviewActive)}
           role="region"
           aria-label="Erros do monitoramento"
           onPointerDown={(e) => e.stopPropagation()}
@@ -539,7 +540,11 @@ export function ErrorsPanel({ errors = [], onClearAll }) {
                 {activeErrors.length || errors.length}
               </span>
               <strong style={{ fontSize: 14, color: colors.text }}>
-                {errors.length === 1 ? '1 registro no log' : `${errors.length} registros no log`}
+                {reviewActive
+                  ? 'Review — falhas neste momento'
+                  : errors.length === 1
+                    ? '1 registro no log'
+                    : `${errors.length} registros no log`}
               </strong>
             </div>
 
