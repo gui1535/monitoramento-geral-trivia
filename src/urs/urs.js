@@ -582,6 +582,66 @@ export function useUrDiagram(interactionMode) {
     })
   }, [])
 
+  const captureReviewState = useCallback(() => {
+    const statuses = {}
+    UR_NUMBERS.forEach((ur) => {
+      const group = getUrGroup(svgRef.current, ur)
+      statuses[ur] = group ? getUrStatus(group) : UR_STATUS.INACTIVE
+    })
+
+    return {
+      statuses,
+      semEnergiaPorUr: serializeSemEnergiaPorUr(semEnergiaPorUrRef.current),
+      fallenFromFiber: [...ursCaidasPorFibraRef.current],
+      activeUrs: [...activeUrsRef.current],
+      uprightChaves: [...uprightChavesRef.current],
+    }
+  }, [])
+
+  const restoreReviewRefs = useCallback((ur = {}) => {
+    connectingTimeoutsRef.current.forEach((timeoutId) => clearTimeout(timeoutId))
+    connectingTimeoutsRef.current.clear()
+
+    semEnergiaPorUrRef.current.clear()
+    Object.entries(ur.semEnergiaPorUr ?? {}).forEach(([urKey, types]) => {
+      const urNumber = Number(urKey)
+      if (!Number.isFinite(urNumber)) return
+      semEnergiaPorUrRef.current.set(urNumber, new Set(types ?? []))
+    })
+
+    ursCaidasPorFibraRef.current.clear()
+    ;(ur.fallenFromFiber ?? []).forEach((urNumber) => {
+      ursCaidasPorFibraRef.current.add(Number(urNumber))
+    })
+
+    activeUrsRef.current.clear()
+    ;(ur.activeUrs ?? []).forEach((urNumber) => {
+      activeUrsRef.current.add(Number(urNumber))
+    })
+
+    uprightChavesRef.current.clear()
+    ;(ur.uprightChaves ?? []).forEach((number) => {
+      uprightChavesRef.current.add(Number(number))
+    })
+
+    publishSemEnergia()
+
+    if (!svgRef.current) return
+
+    UR_NUMBERS.forEach((urNumber) => {
+      const status = ur.statuses?.[urNumber] ?? UR_STATUS.INACTIVE
+      applyUrStatus(svgRef.current, urNumber, status)
+    })
+
+    CHAVE_NUMBERS.forEach((number) => {
+      applyChaveUpright(svgRef.current, number, uprightChavesRef.current.has(number))
+    })
+
+    syncUrEnergyIcons(svgRef.current, {
+      semEnergiaPorUr: semEnergiaPorUrRef.current,
+    })
+  }, [publishSemEnergia])
+
   return {
     registerSvg,
     setOnUrClick,
@@ -603,5 +663,8 @@ export function useUrDiagram(interactionMode) {
     syncUrFallsFromFibers,
     clearUrFallsFromFiberSimulation,
     fallUrsFromFiber,
+    captureReviewState,
+    restoreReviewRefs,
+    getFallenFromFiber: () => [...ursCaidasPorFibraRef.current],
   }
 }
