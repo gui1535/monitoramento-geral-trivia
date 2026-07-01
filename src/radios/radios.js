@@ -416,6 +416,40 @@ export function useRadioDiagram() {
     applyRadioVisibility(svgRef.current, visibilityRef.current)
   }, [])
 
+  const captureReviewState = useCallback(() => {
+    return {
+      unstable: unstableRef.current,
+      cascadeHighlight: cascadeHighlightRef.current,
+      visibility: { ...visibilityRef.current },
+    }
+  }, [])
+
+  const restoreReviewState = useCallback((radio = {}) => {
+    unstableRef.current = Boolean(radio.unstable)
+    cascadeHighlightRef.current = Boolean(radio.cascadeHighlight)
+    visibilityRef.current = {
+      lines: radio.visibility?.lines ?? [],
+      textos: radio.visibility?.textos ?? [],
+      imgs: radio.visibility?.imgs ?? [],
+    }
+
+    if (!svgRef.current) return
+
+    if (unstableRef.current) {
+      applyRadioUnstable(svgRef.current, visibilityRef.current)
+      return
+    }
+
+    if (cascadeHighlightRef.current) {
+      highlightRadios(svgRef.current, visibilityRef.current)
+      return
+    }
+
+    clearRadioUnstable(svgRef.current)
+    clearRadioHighlight(svgRef.current)
+    applyRadioVisibility(svgRef.current, visibilityRef.current)
+  }, [])
+
   return {
     registerSvg,
     applyVisibility,
@@ -428,5 +462,7 @@ export function useRadioDiagram() {
     torreTextoOptions: TORRE_TEXTO_OPTIONS,
     torreImgOptions: TORRE_IMG_OPTIONS,
     getVisibility: () => ({ ...visibilityRef.current }),
+    captureReviewState,
+    restoreReviewState,
   }
 }
